@@ -61,16 +61,10 @@ int doReporStock(pDatabase db, pProduto list)
     return total;
 }
 
-int loadReposicaoStock(char *filename, pDatabase db)
+pArmario loadReposicaoStock(char *path, pDatabase db)
 {
     FILE *f = NULL;
-    char path[MAXPATH];
     pArmario listaProdutos = NULL;
-    pProduto auxProduto;
-    int res = 0;
-    
-    /*Concatenar para o caminho final*/
-    getFullPath(path,sizeof(path),PathReposicao,filename);
     
     /*Ler o ficheiro de texto*/
     f = fopen(path,"r");
@@ -81,25 +75,7 @@ int loadReposicaoStock(char *filename, pDatabase db)
     else
         printf("(loadReposicaoStock)Erro: ficheiro não existe");
     fclose(f);
-    
-    /*Lista com os produtos a repor*/
-    if (listaProdutos)
-    {
-        /*Mostra o que foi lido*/
-        auxProduto = listaProdutos->produtos;
-        while (auxProduto)
-        {
-            printf("\nProduto %d:%d",auxProduto->num,auxProduto->qtd);
-            auxProduto = auxProduto->next;
-        }
-        
-        /*Repor Stock*/
-        doReporStock(db,listaProdutos->produtos);
-        
-        res = listaProdutos->produtosTotal;
-    }
-    freeArmario(listaProdutos);
-    return res;
+    return listaProdutos;
 }
 
 int doReposicaoMenu()
@@ -125,6 +101,8 @@ int doReposicaoPorFicheiro(pDatabase db)
     char path[MAXPATH];
     int tryAgain = 1, res = 0;
     char aux;
+    pArmario listaProdutos;
+    pProduto auxProduto;
     
     /*Cabeçalho*/
     printWindow();
@@ -171,11 +149,57 @@ int doReposicaoPorFicheiro(pDatabase db)
     }
     else
     {
-        mvprintw(activeRow++,STARTCOL," Ficheiro existe");
-        activeRow++;
+        /*Carregar lista de produtos*/
+        listaProdutos = loadReposicaoStock(path,db);
         
-        //int n = loadReposicaoStock(fname,db);
-        //printf("\n%d produtos\n",n);
+        /*Lista com os produtos a repor*/
+        if (listaProdutos)
+        {
+            mvprintw(activeRow++,STARTCOL," Total de produtos: %d",listaProdutos->produtosTotal);
+            activeRow++;
+            
+            /*Mostra o que foi lido*/
+            auxProduto = listaProdutos->produtos;
+            while (auxProduto)
+            {
+                mvprintw(activeRow++,STARTCOL," Produto %d - Q: %d",auxProduto->num,auxProduto->qtd);
+                auxProduto = auxProduto->next;
+                
+                /*Verificar se chegou ao limite da janela*/
+                if (activeRow >= limitRow-3 /*retirar 3 linhas para a pergunta da reposição*/)
+                {
+                    mvprintw(activeRow,STARTCOL," (...)");
+                    break;
+                }
+            }
+            
+            activeRow++;
+            while (tryAgain)
+            {
+                /*Limpar caracter inválido*/
+                mvprintw(activeRow,STARTCOL," Deseja repor?        ");
+                mvprintw(activeRow,STARTCOL," Deseja repor? (s/n)");
+                refresh();
+                aux = getch();
+                /*Volta a tentar se colocar caracter inválido*/
+                tryAgain = aux != 's' && aux != 'S' && aux != 'n' && aux != 'N';
+            }
+            if (aux == 's' || aux == 'S')
+            {
+                /*Repor Stock*/
+                doReporStock(db,listaProdutos->produtos);
+                mvprintw(activeRow++,STARTCOL,"Reposição com sucesso");
+            }
+            else
+                return KEYESCAPE;
+            
+            freeArmario(listaProdutos);
+        }
+        else
+        {
+            mvprintw(activeRow++,STARTCOL," Ficheiro sem artigos ou inválido");
+        }
+        activeRow++;
     }
     return res;
 }
