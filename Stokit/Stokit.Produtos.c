@@ -46,6 +46,7 @@ pProduto newProduto(pArmario parent, pProduto p, int n, int qtd)
         parent->produtosTotal++;
     }
     initProduto(aux,p,n,qtd);
+    aux->parent = parent;
     return aux;
 }
 
@@ -54,7 +55,7 @@ pProduto addProdutoEncomenda(pEncomenda encomenda, int n, int qtd)
     pProduto new, auxProduto;
     int endOfList = 1;
     
-    //Novo elemento
+    /*Novo elemento*/
     new = createProduto(NULL);
     initProduto(new,NULL,n,qtd);
     
@@ -63,7 +64,7 @@ pProduto addProdutoEncomenda(pEncomenda encomenda, int n, int qtd)
         auxProduto = encomenda->produtos;
         while (auxProduto)
         {
-            //Verificar duplicação
+            /*Verificar duplicação*/
             if (auxProduto->num == new->num)
             {
                 //Duplicado
@@ -71,7 +72,7 @@ pProduto addProdutoEncomenda(pEncomenda encomenda, int n, int qtd)
                 return auxProduto;
             }
             
-            //Verificar se é primeiro elemento da lista
+            /*Verificar se é primeiro elemento da lista*/
             if (!auxProduto->prev && new->num < auxProduto->num)
             {
                 //Inserir na primeira posição
@@ -83,10 +84,10 @@ pProduto addProdutoEncomenda(pEncomenda encomenda, int n, int qtd)
                 break;
             }
             
-            //Verificar elementos da lista:
+            /*Verificar elementos da lista:*/
             if (new->num < auxProduto->num)
             {
-                //Inserir no meio da lista
+                /*Inserir no meio da lista*/
                 new->prev = auxProduto->prev;
                 auxProduto->prev->next = new;
                 auxProduto->prev = new;
@@ -100,10 +101,10 @@ pProduto addProdutoEncomenda(pEncomenda encomenda, int n, int qtd)
         
         if (endOfList)
         {
-            //Inicio da lista
+            /*Inicio da lista*/
             if (!encomenda->produtos)
                 encomenda->produtos = new;
-            //Guardar o último produto adicionado
+            /*Guardar o último produto adicionado*/
             if (encomenda->lastProduto)
             {
                 encomenda->lastProduto->next = new;
@@ -128,28 +129,28 @@ void freeProduto(pProduto p)
     }
 }
 
-pProduto getProduto(pCorredor listDB, int IDCorredor, int IDArmario)
+pProduto getProduto(pCorredor corredor, int IDCorredor, int IDArmario)
 {
     pArmario auxArmario;
     /*Parent válido*/
-    if (!listDB)
+    if (!corredor)
     {
         printf("Need list");
         return NULL;
     }
-    auxArmario = getArmario(listDB,IDCorredor,IDArmario);
+    auxArmario = getArmario(corredor,IDCorredor,IDArmario);
     if (!auxArmario) return NULL;
     return auxArmario->produtos;
 }
 
-pProduto getProdutoByNum(pCorredor listDB, int n)
+pProduto getProdutoByNum(pCorredor corredor, int n)
 {
     pArmario auxArmario;
     pProduto auxProduto;
     
-    while (listDB)
+    while (corredor)
     {
-        auxArmario = listDB->armarios;
+        auxArmario = corredor->armarios;
         while (auxArmario)
         {
             if (auxArmario->produtos)
@@ -164,7 +165,7 @@ pProduto getProdutoByNum(pCorredor listDB, int n)
             }
             auxArmario = auxArmario->next;
         }
-        listDB = listDB->next;
+        corredor = corredor->next;
     }
     return NULL;
 }

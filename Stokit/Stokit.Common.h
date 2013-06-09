@@ -3,6 +3,11 @@
 
 #define LIMIT_CORREDOR 3
 #define LIMIT_ARMARIO 4
+#define LIMIT_PRODUTO 6
+
+#define ASCIIZERO 48
+#define ASCIIESC 27
+#define KEYESCAPE -21
 
 typedef struct recDatabase Database, *pDatabase;
 typedef struct recCorredor Corredor, *pCorredor;

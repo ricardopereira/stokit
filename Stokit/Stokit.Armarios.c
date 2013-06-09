@@ -16,12 +16,12 @@ pArmario newArmario(pCorredor parent, pArmario p)
     }
     if (!p)
     {
-        //Primeiro elemento
+        /*Primeiro elemento*/
         aux->ID = 1;
     }
     else
     {
-        //Próximo elemento - sequencial
+        /*Próximo elemento - sequencial*/
         aux->ID = p->ID + 1;
         p->next = aux;
     }
@@ -57,11 +57,11 @@ void freeArmario(pArmario p)
 
 void deleteArmario(pCorredor parent, pArmario p)
 {
-    //Se for primeiro elemento
+    /*Se for primeiro elemento*/
     
-    //Se for elemento interior, sem ser dos extremos
+    /*Se for elemento interior, sem ser dos extremos*/
     
-    //Ultimo elemento
+    /*Ultimo elemento*/
     if (p->prev && !p->next)
     {
         if (parent)
@@ -78,18 +78,18 @@ pArmario getArmario(pCorredor listDB, int IDCorredor, int IDArmario)
     pArmario auxArmario;
     while (listDB)
     {
-        //Verificar o corredor
+        /*Verificar o corredor*/
         if (listDB->ID != IDCorredor)
         {
             listDB = listDB->next;
             continue;
         }
-        //Verificar o armário
+        /*Verificar o armário*/
         if (!listDB->armarios) return NULL;
         auxArmario = listDB->armarios;
         while (auxArmario)
         {
-            //Armário conicide
+            /*Armário conicide*/
             if (auxArmario->ID == IDArmario)
                 return auxArmario;
             auxArmario = auxArmario->next;

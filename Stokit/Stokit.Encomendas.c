@@ -151,7 +151,7 @@ void doRouteProduto(pArmario armario, pProduto p)
 
 void showRouteEncomenda(pDatabase db, pEncomenda enc)
 {
-    //ToDo - poderá necessitar de optimização
+    /*ToDo - poderá necessitar de optimização*/
     forEachArmario(db,enc->produtos,doRouteProduto);
 }
 

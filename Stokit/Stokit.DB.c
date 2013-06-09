@@ -29,28 +29,28 @@ pDatabase readFile(FILE *f)
     pCorredor auxCorredor = NULL;
     pArmario auxArmario;
     pProduto auxProduto;
-    //Inicializar
+    /*Inicializar*/
     result->corredores = NULL;
     result->maxCorredores = 0;
     result->maxArmarios = 0;
     
-    //Inicialização
+    /*Inicialização*/
     idxCorredor = 0;
     doNextCorredor = 1;
     idxArmario = 0;
     doNextArmario = 1;
     
-    //Interpretar o ficheiro
+    /*Interpretar o ficheiro*/
     while (fread(&aux,sizeof(int),1,f) == 1)
     {
-        //Número de Corredores
+        /*Número de Corredores*/
         if (idx == 0)
         {
             result->maxCorredores = aux;
             idx++;
             continue;
         }
-        //Número de Armários
+        /*Número de Armários*/
         if (idx == 1)
         {
             result->maxArmarios = aux;
@@ -61,12 +61,12 @@ pDatabase readFile(FILE *f)
         if (doNextCorredor)
         {
             auxCorredor = newCorredor(auxCorredor);
-            //Primeiro elemento da lista
+            /*Primeiro elemento da lista*/
             if (idxCorredor == 0)
                 result->corredores = auxCorredor;
-            //Ultimo elemento
+            /*Ultimo elemento*/
             result->lastCorredor = auxCorredor;
-            //Inicializar a lista de armários para cada corredor
+            /*Inicializar a lista de armários para cada corredor*/
             auxArmario = NULL;
             idxArmario = 0;
             doNextArmario = 1;
@@ -78,7 +78,7 @@ pDatabase readFile(FILE *f)
         if (doNextArmario)
         {
             auxArmario = newArmario(auxCorredor,auxArmario);
-            //Inicializar a lista de produtos para cada armário
+            /*Inicializar a lista de produtos para cada armário*/
             auxProduto = NULL;
             idxProduto = 0;
             maxProdutos = 0;
@@ -90,19 +90,15 @@ pDatabase readFile(FILE *f)
         if (idxProduto == 0)
         {
             maxProdutos = aux;
-            //printf("\nA%d.%d\n",idxCorredor,idxArmario);
-            //printf("Produtos: %d\n",maxProdutos);
         }
         else
         {
             if (idxProduto % 2 == 1)
             {
-                //printf("P%d ",aux);
                 auxProduto = newProduto(auxArmario,auxProduto,aux,0);
             }
             else
             {
-                //printf("Qtd: %d\n",aux);
                 auxProduto->qtd = aux;
             }
         }
@@ -135,20 +131,20 @@ void writeFile(FILE *f, pDatabase db)
         printf("(writeFile)Erro: sem ficheiro\n");
         return;
     }
-    //Gravar número de corredores
+    /*Gravar número de corredores*/
     aux = db->maxCorredores;
     fwrite(&aux,sizeof(int),1,f);
-    //Gravar número de armários
+    /*Gravar número de armários*/
     aux = db->maxArmarios;
     fwrite(&aux,sizeof(int),1,f);
-    //Gravar estrutura
+    /*Gravar estrutura*/
     auxCorredor = db->corredores;
     while(auxCorredor)
     {
         auxArmario = auxCorredor->armarios;
         while (auxArmario)
         {
-            //Grava número de produtos do armário
+            /*Grava número de produtos do armário*/
             aux = auxArmario->produtosTotal;
             fwrite(&aux,sizeof(int),1,f);
             
@@ -184,7 +180,7 @@ pDatabase loadDB(const char *path)
         return NULL;
     }
     
-    //Carregar a estrutura do ficheiro
+    /*Carregar a estrutura do ficheiro*/
     startDB = readFile(f);
     
     fclose(f);
@@ -202,7 +198,7 @@ int saveDB(const char *path, pDatabase db)
         return 1;
     }
     
-    //Gravar para o ficheiro
+    /*Gravar para o ficheiro*/
     writeFile(f,db);
     
     fclose(f);

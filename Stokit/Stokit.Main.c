@@ -18,6 +18,7 @@ void printClose();
 void printWindow();
 
 void doVisualizar(pDatabase db);
+void doPesquisa(pDatabase db);
 
 int main(int argc, const char * argv[])
 {
@@ -42,15 +43,18 @@ int main(int argc, const char * argv[])
         printMenu();
     
         refresh();
-        option = getch();
+        option = getch() - ASCIIZERO;
         
         switch (option) {
-            case 49:
-                /*Visualização de corredores, armários e produtos*/
+            case 1:
+                /*Visualização de produtos de corredores e armários*/
                 doVisualizar(db);
                 break;
+            case 2:
+                doPesquisa(db);
+                break;
         }
-        if (option == 27 || option == 48)
+        if (option == KEYESCAPE || option == 0)
             break;
     }
     
@@ -181,13 +185,18 @@ void showCorredoresArmarios(pDatabase db, int idCorredor, int idArmario, void (*
 int doVisualizarMenu()
 {
     int option = 0;
-    mvprintw(activeRow++,STARTCOL,"1. Visualizar tudo");
-    mvprintw(activeRow++,STARTCOL,"2. Visualizar corredor");
-    mvprintw(activeRow++,STARTCOL,"3. Visualizar corredor & armário");
-    refresh();
-    while (option != 49 && option != 50 && option != 51)
-        option = getch();
-    return option - 48;
+    while (option != 1 && option != 2 && option != 3  && option != KEYESCAPE)
+    {
+        /*Inicializar a janela*/
+        printWindow();
+        mvprintw(activeRow++,STARTCOL,"1. Visualizar tudo");
+        mvprintw(activeRow++,STARTCOL,"2. Visualizar corredor");
+        mvprintw(activeRow++,STARTCOL,"3. Visualizar corredor & armário");
+        mvprintw(activeRow++,STARTCOL,"ESC. Voltar ao menu");
+        refresh();
+        option = getch() - ASCIIZERO;
+    }
+    return option;
 }
 
 void doVisualizarTudoCabecalho(int page, int *idCorredor, int *idArmario)
@@ -303,9 +312,7 @@ void doVisualizarCorredorArmario(pDatabase db)
 
 void doVisualizar(pDatabase db)
 {
-    /*Inicializar a janela*/
-    printWindow();
-    
+    /*MENU de seleção*/
     switch (doVisualizarMenu()) {
         case 1:
             doVisualizarTudo(db);
@@ -316,11 +323,113 @@ void doVisualizar(pDatabase db)
         case 3:
             doVisualizarCorredorArmario(db);
             break;
+        case KEYESCAPE:
+            return;
         default:
             break;
     }
 
     mvprintw(activeRow++,STARTCOL,"Prima escape para voltar ao menu");
     refresh();
-    while (getch() != 27);
+    while (getch() != ASCIIESC);
+}
+
+int doPesquisaMenu()
+{
+    int option = 0;
+    while (option != 1 && option != KEYESCAPE)
+    {
+        /*Inicializar a janela*/
+        printWindow();
+        mvprintw(activeRow++,STARTCOL,"1. Pesquisar produto");
+        activeRow++;
+        mvprintw(activeRow++,STARTCOL,"ESC. Voltar ao menu");
+        refresh();
+        option = getch() - ASCIIZERO;
+    }
+    return option;
+}
+
+int doPesquisaProduto(pDatabase db)
+{
+    pProduto auxProduto = NULL;
+    pArmario auxArmario = NULL;
+    pCorredor auxCorredor = NULL;
+    int idProduto = 0, tryAgain = 1, res = 0;
+    char aux;
+    char prod[LIMIT_PRODUTO+1]; /* +1 por causa da leitura pelo getnstr */
+        
+    /*Cabeçalho*/
+    printWindow();
+
+    mvprintw(activeRow++,STARTCOL,"1. Pesquisar produto");
+    /*Enquanto for igual a zero*/
+    while (!idProduto)
+    {
+        /*Limpar resposta inválida*/
+        /*ToDo - espaços deviam ser consoante o número de caracteres válidos*/
+        mvprintw(activeRow,STARTCOL," Indique o id do produto:        ");
+        refresh();
+        /*Pedir o corredor*/
+        mvprintw(activeRow,STARTCOL," Indique o id do produto: ");
+        getnstr(prod,LIMIT_PRODUTO);
+        idProduto = atoi(prod);
+    }
+    activeRow += 2;
+    mvprintw(activeRow++,STARTCOL,"Informação do produto P%d:",idProduto);
+    
+    auxProduto = getProdutoByNum(db->corredores,idProduto);
+    if (auxProduto)
+    {
+        auxArmario = auxProduto->parent;
+        if (auxArmario)
+            auxCorredor = auxArmario->parent;
+        
+        if (auxCorredor)
+            mvprintw(activeRow++,STARTCOL," Corredor: %d",auxCorredor->ID);
+        if (auxArmario)
+            mvprintw(activeRow++,STARTCOL," Armário: %d",auxArmario->ID);
+        mvprintw(activeRow++,STARTCOL," Quantidade: %d",auxProduto->qtd);
+        activeRow++;
+    }
+    else
+    {
+        mvprintw(activeRow++,STARTCOL," Não existe");
+        activeRow++;
+        while (tryAgain)
+        {
+            /*Limpar caracter inválido*/
+            mvprintw(activeRow,STARTCOL," Deseja fazer nova pesquisa?        ");
+            mvprintw(activeRow,STARTCOL," Deseja fazer nova pesquisa? (s/n)");
+            refresh();
+            aux = getch();
+            /*Volta a tentar se colocar caracter inválido*/
+            tryAgain = aux != 's' && aux != 'S' && aux != 'n' && aux != 'N';
+        }
+        if (aux == 's' || aux == 'S')
+        {
+            /*Recursivo*/
+            res = doPesquisaProduto(db);
+        }
+        else
+            return KEYESCAPE;
+    }
+    return res;
+}
+
+void doPesquisa(pDatabase db)
+{
+    /*MENU de seleção*/
+    switch (doPesquisaMenu()) {
+        case KEYESCAPE:
+            return;
+        default:
+            if (doPesquisaProduto(db) == KEYESCAPE)
+                return;
+            break;
+    }
+    
+    mvprintw(activeRow++,STARTCOL,"Prima escape para voltar ao menu");
+    refresh();
+    while (getch() != ASCIIESC);
 }
