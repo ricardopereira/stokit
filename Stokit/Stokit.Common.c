@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <string.h>
+#include <ncurses.h>
+
 #include "Stokit.Common.h"
 
 void showCorredores(pCorredor p, int showProdutos)
@@ -63,4 +65,24 @@ void getFullPath(char *result, int size, char *path, char *filename)
     snprintf(result,size,"%s%s",path,filename);
     /*Retirar o \n atribuído ao fazer fgets*/
     removeBreakLine(result);
+}
+
+int ask(char *question)
+{
+    int tryAgain = 1;
+    char aux;
+    while (tryAgain)
+    {
+        /*Limpar caracter inválido*/
+        mvprintw(activeRow,STARTCOL," %s        ",question);
+        mvprintw(activeRow,STARTCOL," %s (s/n)",question);
+        refresh();
+        aux = getch();
+        /*Volta a tentar se colocar caracter inválido*/
+        tryAgain = aux != 's' && aux != 'S' && aux != 'n' && aux != 'N';
+    }
+    if (aux == 's' || aux == 'S')
+        return 1;
+    else
+        return 0;
 }

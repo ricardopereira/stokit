@@ -151,10 +151,10 @@ void doRouteProduto(pArmario armario, pProduto p)
     }
 }
 
-void showRouteEncomenda(pDatabase db, pEncomenda enc)
+void doRouteEncomenda(pDatabase db, pEncomenda encomenda)
 {
     /*ToDo - poderá necessitar de optimização*/
-    forEachArmario(db,enc->produtos,doRouteProduto);
+    forEachArmario(db,encomenda->produtos,doRouteProduto);
 }
 
 pEncomenda loadEncomenda(char *path, pDatabase db)
@@ -194,8 +194,7 @@ int doEncomendaPorFicheiro(pDatabase db)
 {
     char fileName[MAXFILENAME+1]; /* +1 por causa da leitura pelo getnstr */
     char path[MAXPATH];
-    int totalSatisfeitos, tryAgain = 1, res = 0;
-    char aux;
+    int totalSatisfeitos, res = 0;
     pEncomenda encomenda;
     pProduto auxProduto;
     
@@ -224,17 +223,7 @@ int doEncomendaPorFicheiro(pDatabase db)
     {
         mvprintw(activeRow++,STARTCOL," Ficheiro não existe");
         activeRow++;
-        while (tryAgain)
-        {
-            /*Limpar caracter inválido*/
-            mvprintw(activeRow,STARTCOL," Deseja tentar novamente?        ");
-            mvprintw(activeRow,STARTCOL," Deseja tentar novamente? (s/n)");
-            refresh();
-            aux = getch();
-            /*Volta a tentar se colocar caracter inválido*/
-            tryAgain = aux != 's' && aux != 'S' && aux != 'n' && aux != 'N';
-        }
-        if (aux == 's' || aux == 'S')
+        if (ask("Deseja tentar novamente?"))
         {
             /*Recursivo*/
             res = doEncomendaPorFicheiro(db);
@@ -269,41 +258,37 @@ int doEncomendaPorFicheiro(pDatabase db)
             }
             
             activeRow++;
-            while (tryAgain)
-            {
-                /*Limpar caracter inválido*/
-                mvprintw(activeRow,STARTCOL," Deseja satisfazer?        ");
-                mvprintw(activeRow,STARTCOL," Deseja satisfazer? (s/n)");
-                refresh();
-                aux = getch();
-                /*Volta a tentar se colocar caracter inválido*/
-                tryAgain = aux != 's' && aux != 'S' && aux != 'n' && aux != 'N';
-            }
-            if (aux == 's' || aux == 'S')
+            if (ask("Deseja satisfazer?"))
             {
                 /*Satisfazer encomenda*/
-                //totalSatisfeitos = doSatisfazerEncomenda(db,encomenda);
-                
-                totalSatisfeitos = 0;
-                
+                totalSatisfeitos = doSatisfazerEncomenda(db,encomenda);
                 /*Verificar se foi satisfeita*/
                 if (encomenda->produtosTotal - totalSatisfeitos == 0)
                 {
                     mvprintw(activeRow++,STARTCOL,"Encomenda satisfeita com sucesso");
                     
-                    //showRouteEncomenda(db,encomenda);
+                    if (ask("Deseja visualizar o caminho para os produtos?"))
+                    {
+                        doRouteEncomenda(db,encomenda);
+                    }
                 }
                 else
                 {
                     mvprintw(activeRow++,STARTCOL,"Encomenda não foi satisfeita por falta de stock de %d produtos",encomenda->produtosTotal - totalSatisfeitos);
+                    
+                    if (ask("Deseja visualizar esses produtos?"))
+                    {
+                        //doShowProdutos(db,encomenda->produtos);
+                    }
                     
                     //checkEncomenda(encomenda);
                 }
             }
             else
                 activeRow++;
-                
-            freeEncomenda(encomenda);
+            
+            /*ToDo - verificar problema de memória com ncurses.h*/
+            //freeEncomenda(encomenda);
         }
         else
         {
