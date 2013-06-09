@@ -33,7 +33,7 @@ int main(int argc, const char * argv[])
     #endif
 
     getmaxyx(stdscr,maxRow,maxCol);
-    limitRow = maxRow - 4;
+    limitRow = maxRow - 3;
     
     /*MENU*/
     while (1)
@@ -146,9 +146,19 @@ void doVisualizar(pDatabase db)
         while (auxArmario)
         {
             mvprintw(activeRow++,STARTCOL," A%d.%d",auxCorredor->ID,auxArmario->ID);
+            
+            /*Verificar se chegou ao limite da janela*/
+            if (checkWindowLimit(&page) == 1)
+                doVisualizarMenu(page);
+            
             if (auxArmario->produtos)
             {
                 mvprintw(activeRow++,STARTCOL,"  Produtos: %d",auxArmario->produtosTotal);
+                
+                /*Verificar se chegou ao limite da janela*/
+                if (checkWindowLimit(&page) == 1)
+                    doVisualizarMenu(page);
+                
                 auxProduto = auxArmario->produtos;
                 while (auxProduto)
                 {
@@ -159,16 +169,8 @@ void doVisualizar(pDatabase db)
                     if (checkWindowLimit(&page) == 1)
                         doVisualizarMenu(page);
                 }
-                
-                /*Verificar se chegou ao limite da janela*/
-                if (checkWindowLimit(&page) == 1)
-                    doVisualizarMenu(page);
             }
             auxArmario = auxArmario->next;
-            
-            /*Verificar se chegou ao limite da janela*/
-            if (checkWindowLimit(&page) == 1)
-                doVisualizarMenu(page);
         }
         auxCorredor = auxCorredor->next;
     }
