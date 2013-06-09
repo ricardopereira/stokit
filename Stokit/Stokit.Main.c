@@ -17,6 +17,8 @@ void printCaption();
 void printClose();
 void printWindow();
 
+void doVisualizar(pDatabase db);
+
 int main(int argc, const char * argv[])
 {
     pDatabase db;
@@ -31,7 +33,7 @@ int main(int argc, const char * argv[])
     #endif
 
     getmaxyx(stdscr,maxRow,maxCol);
-    limitRow = maxRow - 3;
+    limitRow = maxRow - 4;
     
     /*MENU*/
     while (1)
@@ -44,14 +46,8 @@ int main(int argc, const char * argv[])
         
         switch (option) {
             case 49:
-                printWindow();
-                mvprintw(activeRow,STARTCOL,"1. Visualizar\n");
-                activeRow += 2;
-
-                mvprintw(activeRow,STARTCOL,"Lista de Corredores\n");
-                
-                mvprintw(limitRow,STARTCOL,"Para voltar, prima qualquer tecla");
-                getch();
+                /*Visualização de corredores, armários e produtos*/
+                doVisualizar(db);
                 break;
         }
         if (option == 27 || option == 48)
@@ -107,4 +103,76 @@ void printClose()
     char text[50];
     snprintf(text,sizeof(text),"Prima qualquer tecla para sair");
     mvprintw(maxRow/2,(int)(maxCol-strlen(text))/2,text);
+}
+
+int checkWindowLimit(int *page)
+{
+    /*Verificar se chegou ao limite da janela*/
+    if (activeRow >= limitRow)
+    {
+        mvprintw(activeRow,STARTCOL,"Prima enter para continuar...");
+        refresh();
+        getch();
+        printWindow();
+        (*page)++;
+        return 1;
+    }
+    return 0;
+}
+
+void doVisualizarMenu(int page)
+{
+    mvprintw(activeRow,STARTCOL,"1. Visualizar\n");
+    activeRow += 2;
+    mvprintw(activeRow++,STARTCOL,"Lista de Corredores (Página %d)\n",page);
+}
+
+void doVisualizar(pDatabase db)
+{
+    pCorredor auxCorredor;
+    pArmario auxArmario;
+    pProduto auxProduto;
+    int page = 1;
+    
+    /*Inicializar a janela*/
+    printWindow();
+    
+    doVisualizarMenu(page);
+    
+    auxCorredor = db->corredores;
+    while (auxCorredor)
+    {
+        auxArmario = auxCorredor->armarios;
+        while (auxArmario)
+        {
+            mvprintw(activeRow++,STARTCOL," A%d.%d",auxCorredor->ID,auxArmario->ID);
+            if (auxArmario->produtos)
+            {
+                mvprintw(activeRow++,STARTCOL,"  Produtos: %d",auxArmario->produtosTotal);
+                auxProduto = auxArmario->produtos;
+                while (auxProduto)
+                {
+                    mvprintw(activeRow++,STARTCOL,"   P%d: %d",auxProduto->num,auxProduto->qtd);
+                    auxProduto = auxProduto->next;
+                    
+                    /*Verificar se chegou ao limite da janela*/
+                    if (checkWindowLimit(&page) == 1)
+                        doVisualizarMenu(page);
+                }
+                
+                /*Verificar se chegou ao limite da janela*/
+                if (checkWindowLimit(&page) == 1)
+                    doVisualizarMenu(page);
+            }
+            auxArmario = auxArmario->next;
+            
+            /*Verificar se chegou ao limite da janela*/
+            if (checkWindowLimit(&page) == 1)
+                doVisualizarMenu(page);
+        }
+        auxCorredor = auxCorredor->next;
+    }
+    mvprintw(activeRow++,STARTCOL,"Prima escape para voltar ao menu");
+    refresh();
+    while (getch() != 27);
 }
