@@ -120,36 +120,12 @@ int checkWindowLimit(int *page)
     return 0;
 }
 
-int doVisualizarMenu()
-{
-    int option = 0;
-    mvprintw(activeRow++,STARTCOL,"1. Visualizar tudo\n");
-    mvprintw(activeRow++,STARTCOL,"2. Visualizar corredor\n");
-    mvprintw(activeRow++,STARTCOL,"3. Visualizar corredor & armário\n");
-    refresh();
-    option = getch();
-    while (option != 49 && option != 50 && option != 51)
-        option = getch();
-    return option - 48;
-}
-
-void doVisualizarTudoCabecalho(int page)
-{
-    mvprintw(activeRow,STARTCOL,"1. Visualizar\n");
-    activeRow += 2;
-    mvprintw(activeRow++,STARTCOL,"Lista de Corredores (Página %d)\n",page);
-}
-
-void doVisualizarTudo(pDatabase db)
+void showCorredoresArmarios(pDatabase db, int idCorredor, int idArmario, int (*f)(int, int))
 {
     pCorredor auxCorredor;
     pArmario auxArmario;
     pProduto auxProduto;
     int page = 1;
-    
-    /*Cabeçalho*/
-    printWindow();
-    doVisualizarTudoCabecalho(page);
     
     auxCorredor = db->corredores;
     while (auxCorredor)
@@ -161,7 +137,7 @@ void doVisualizarTudo(pDatabase db)
             
             /*Verificar se chegou ao limite da janela*/
             if (checkWindowLimit(&page) == 1)
-                doVisualizarTudoCabecalho(page);
+                (*f)(page,idCorredor);
             
             if (auxArmario->produtos)
             {
@@ -169,7 +145,7 @@ void doVisualizarTudo(pDatabase db)
                 
                 /*Verificar se chegou ao limite da janela*/
                 if (checkWindowLimit(&page) == 1)
-                    doVisualizarTudoCabecalho(page);
+                    (*f)(page,idCorredor);
                 
                 auxProduto = auxArmario->produtos;
                 while (auxProduto)
@@ -179,13 +155,89 @@ void doVisualizarTudo(pDatabase db)
                     
                     /*Verificar se chegou ao limite da janela*/
                     if (checkWindowLimit(&page) == 1)
-                        doVisualizarTudoCabecalho(page);
+                        (*f)(page,idCorredor);
                 }
             }
             auxArmario = auxArmario->next;
         }
         auxCorredor = auxCorredor->next;
     }
+}
+
+int doVisualizarMenu()
+{
+    int option = 0;
+    mvprintw(activeRow++,STARTCOL,"1. Visualizar tudo");
+    mvprintw(activeRow++,STARTCOL,"2. Visualizar corredor");
+    mvprintw(activeRow++,STARTCOL,"3. Visualizar corredor & armário");
+    refresh();
+    option = getch();
+    while (option != 49 && option != 50 && option != 51)
+        option = getch();
+    return option - 48;
+}
+
+int doVisualizarTudoCabecalho(int page, int fiction)
+{
+    mvprintw(activeRow,STARTCOL,"1. Visualizar tudo");
+    activeRow += 2;
+    mvprintw(activeRow++,STARTCOL,"Lista de produtos (Página %d)",page);
+    return 0;
+}
+
+void doVisualizarTudo(pDatabase db)
+{    
+    /*Cabeçalho*/
+    printWindow();
+    doVisualizarTudoCabecalho(1,0);
+    /*Mostrar dados*/
+    showCorredoresArmarios(db,0,0,doVisualizarTudoCabecalho);
+}
+
+int doVisualizarCorredorCabecalho(int page, int IDCorredor)
+{
+    char corr[LIMIT_CORREDOR+1]; /* +1 por causa da leitura pelo getnstr */
+    
+    if (IDCorredor == 0)
+    {
+        mvprintw(activeRow++,STARTCOL,"2. Visualizar corredor");
+        /*Enquanto for igual a zero*/
+        while (!IDCorredor)
+        {
+            /*Limpar resposta inválida*/
+            /*ToDo - espaços deviam ser consoante o número de caracteres válidos para o corredor*/
+            mvprintw(activeRow,STARTCOL," Indique o corredor:     ");
+            /*Pedir o corredor*/
+            mvprintw(activeRow,STARTCOL," Indique o corredor: ");
+            getnstr(corr,LIMIT_CORREDOR);
+            IDCorredor = atoi(corr);
+        }
+        activeRow++;
+    }
+    else
+    {
+        mvprintw(activeRow++,STARTCOL,"2. Visualizar corredor");
+        mvprintw(activeRow++,STARTCOL," Indique o corredor: %d",IDCorredor);
+    }
+    activeRow++;
+    mvprintw(activeRow++,STARTCOL,"Lista de produtos (Página %d)",page);
+    return IDCorredor;
+}
+
+void doVisualizarCorredor(pDatabase db)
+{
+    int IDCorredor = 0;    
+    /*Cabeçalho*/
+    printWindow();
+    IDCorredor = doVisualizarCorredorCabecalho(1,IDCorredor);
+    /*Mostrar dados*/
+    showCorredoresArmarios(db,IDCorredor,0,doVisualizarCorredorCabecalho);
+}
+
+void doVisualizarCorredorArmario(pDatabase db)
+{
+    //int IDCorredor, IDArmario;
+    
 }
 
 void doVisualizar(pDatabase db)
@@ -197,7 +249,12 @@ void doVisualizar(pDatabase db)
         case 1:
             doVisualizarTudo(db);
             break;
-            
+        case 2:
+            doVisualizarCorredor(db);
+            break;
+        case 3:
+            doVisualizarCorredorArmario(db);
+            break;
         default:
             break;
     }

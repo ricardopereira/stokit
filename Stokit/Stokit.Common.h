@@ -1,6 +1,9 @@
 #define STARTCOL 3
 #define STARTROW 3
 
+#define LIMIT_CORREDOR 3
+#define LIMIT_ARMARIO 4
+
 typedef struct recDatabase Database, *pDatabase;
 typedef struct recCorredor Corredor, *pCorredor;
 typedef struct recArmario Armario, *pArmario;
