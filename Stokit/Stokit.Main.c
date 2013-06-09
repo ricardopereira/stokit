@@ -51,7 +51,20 @@ int main(int argc, const char * argv[])
                 doVisualizar(db);
                 break;
             case 2:
+                /*Pesquisa de produtos*/
                 doPesquisa(db);
+                break;
+            case 3:
+                /*Reposição de stock através dum ficheiro*/
+                doReposicao(db);
+                break;
+            case 4:
+                /*Satisfação de encomendas através dum ficheiro*/
+                //doEncomenda(db);
+                break;
+            case 5:
+                /*Resumo do dia*/
+                //doResumo(db);
                 break;
         }
         if (option == KEYESCAPE || option == 0)
@@ -192,6 +205,7 @@ int doVisualizarMenu()
         mvprintw(activeRow++,STARTCOL,"1. Visualizar tudo");
         mvprintw(activeRow++,STARTCOL,"2. Visualizar corredor");
         mvprintw(activeRow++,STARTCOL,"3. Visualizar corredor & armário");
+        activeRow++;
         mvprintw(activeRow++,STARTCOL,"ESC. Voltar ao menu");
         refresh();
         option = getch() - ASCIIZERO;

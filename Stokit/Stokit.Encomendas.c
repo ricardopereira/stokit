@@ -20,15 +20,15 @@ pEncomenda getEncomenda(FILE *f)
     {
         while (!feof(f))
         {
-            //Lê a linha da encomenda
+            /*Lê a linha da encomenda*/
             if (fscanf(f,"%d:%d",&num,&qtd) == 2)
             {
-                //Adiciona o produto
+                /*Adiciona o produto*/
                 auxProduto = addProdutoEncomenda(resEncomenda,num,qtd);
             }
             else if (fgets(buffer,sizeof(buffer),f))
             {
-                //Ler nome da encomenda
+                /*Ler nome da encomenda*/
                 removeBreakLine(buffer);
                 puts(buffer);
             }
@@ -43,43 +43,43 @@ pEncomenda getEncomenda(FILE *f)
 
 int doSatisfazerEncomenda(pDatabase db, pEncomenda enc)
 {
-    //Verificar se existe algum produto a encomendar
+    /*Verificar se existe algum produto a encomendar*/
     if (!db || !enc) return 0;
     pProduto encProduto,auxProduto;
-    //Guardar cada produto que foi alterado
+    /*Guardar cada produto que foi alterado*/
     pProduto* trackChanges = calloc(enc->produtosTotal,sizeof(pArmario));
     
     int total = 0, needRollback = 0, i = 0;
-    //Lista da encomenda
+    /*Lista da encomenda*/
     encProduto = enc->produtos;
     while (encProduto)
     {
         auxProduto = getProdutoByNum(db->corredores,encProduto->num);
-        //Encontrado o produto?
+        /*Encontrado o produto?*/
         if (auxProduto && auxProduto->qtd >= encProduto->qtd)
         {
-            //Satisfazer a encomenda
+            /*Satisfazer a encomenda*/
             if (!needRollback)
             {
                 auxProduto->lastQtd = auxProduto->qtd;
                 auxProduto->qtd -= encProduto->qtd;
                 trackChanges[total++] = auxProduto;
                 
-                //ToDo - gerar relatório da venda dos produtos
+                /*ToDo - gerar relatório da venda dos produtos*/
             }
         }
         else
         {
-            //Criar aviso para encomendar o produto
+            /*Criar aviso para encomendar o produto*/
             encProduto->needStock = 1;
             needRollback = 1;
         }
         encProduto = encProduto->next;
     }
-    //Rollback
+    /*Rollback*/
     if (needRollback)
     {
-        //Colocar o produto como estava antes da satisfação da encomenda
+        /*Colocar o produto como estava antes da satisfação da encomenda*/
         auxProduto = trackChanges[i];
         while (auxProduto)
         {
@@ -125,14 +125,14 @@ void doRouteProduto(pArmario armario, pProduto p)
 {
     pProduto auxProduto, routeProduto;
     int showCabecalho = 1;
-    //Para cada armário
+    /*Para cada armário*/
     if (armario && p)
     {
-        //Indicar o caminho a percorrer para cada produto
+        /*Indicar o caminho a percorrer para cada produto*/
         routeProduto = p;
         while (routeProduto)
         {
-            //Tenta encontrar o produto no armário atual
+            /*Tenta encontrar o produto no armário atual*/
             auxProduto = findProduto(armario,routeProduto->num);
             if (auxProduto)
             {
@@ -158,16 +158,16 @@ void showRouteEncomenda(pDatabase db, pEncomenda enc)
 int loadEncomenda(char *filename, pDatabase db)
 {
     FILE *f = NULL;
-    char path[256];
+    char path[MAXPATH];
     pEncomenda encomenda = NULL;
     pProduto auxProduto;
     char satisfazerEncomenda;
     int res = 0;
     
-    //Concatenar para o caminho final
+    /*Concatenar para o caminho final*/
     getFullPath(path,sizeof(path),PathEncomendas,filename);
     
-    //Ler o ficheiro de texto
+    /*Ler o ficheiro de texto*/
     f = fopen(path,"r");
     if (f)
     {
@@ -177,10 +177,10 @@ int loadEncomenda(char *filename, pDatabase db)
         printf("(loadEncomenda)Erro: ficheiro não existe");
     fclose(f);
     
-    //Encomenda com os produtos
+    /*Encomenda com os produtos*/
     if (encomenda)
     {
-        //Mostra o que foi lido
+        /*Mostra o que foi lido*/
         auxProduto = encomenda->produtos;
         while (auxProduto)
         {
@@ -188,12 +188,12 @@ int loadEncomenda(char *filename, pDatabase db)
             auxProduto = auxProduto->next;
         }
         
-        //Caminho da encomenda
+        /*Caminho da encomenda*/
         printf("\n");
         showRouteEncomenda(db,encomenda);
         printf("\n");
         
-        //Verificar se é para satisfazer
+        /*Verificar se é para satisfazer*/
         printf("\nDeseja satisfazer a encomenda? (s/n)");
         satisfazerEncomenda = getchar();
         if (satisfazerEncomenda == 's')
@@ -201,7 +201,7 @@ int loadEncomenda(char *filename, pDatabase db)
             doSatisfazerEncomenda(db,encomenda);
             res = encomenda->produtosTotal;
             
-            //Mostrar avisos
+            /*Mostrar avisos*/
             checkEncomenda(encomenda);
         }
     }

@@ -5,10 +5,11 @@
 void testReposicaoStock(pDatabase db)
 {
     char fname[64];
+    int n;
     printf("\nIndique o ficheiro:\n");
     /*Necessita de ter um \n antes do fgets para ler a linha*/
     fgets(fname,sizeof(fname),stdin);
-    int n = loadReposicaoStock(fname,db);
+    n = loadReposicaoStock(fname,db);
     printf("\n%d produtos\n",n);
     if (n) showCorredores(db->corredores,1);
 }
@@ -16,10 +17,11 @@ void testReposicaoStock(pDatabase db)
 void testSatisfazerEncomenda(pDatabase db)
 {
     char fname[64];
+    int n;
     printf("\nIndique o ficheiro:\n");
     /*Necessita de ter um \n antes do fgets para ler a linha*/
     fgets(fname,sizeof(fname),stdin);
-    int n = loadEncomenda(fname,db);
+    n = loadEncomenda(fname,db);
     printf("\n%d produtos\n",n);
     if (n) showCorredores(db->corredores,1);
 }

@@ -5,6 +5,9 @@
 #define LIMIT_ARMARIO 4
 #define LIMIT_PRODUTO 6
 
+#define MAXFILENAME 64
+#define MAXPATH 255
+
 #define ASCIIZERO 48
 #define ASCIIESC 27
 #define KEYESCAPE -21
