@@ -59,10 +59,10 @@ void removeBreakLine(char *result)
 
 void getFullPath(char *result, int size, char *path, char *filename)
 {
-    //Concatenar para o caminho final
+    /*Concatenar para o caminho final*/
     snprintf(result,size,"%s%s",path,filename);
-    //Verificar caminho
+    /*Verificar caminho*/
     puts(result);
-    //Retirar o \n atribuído ao fazer fgets
+    /*Retirar o \n atribuído ao fazer fgets*/
     removeBreakLine(result);
 }

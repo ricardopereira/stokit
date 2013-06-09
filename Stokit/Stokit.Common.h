@@ -1,8 +1,14 @@
+#define STARTCOL 3
+#define STARTROW 3
+
 typedef struct recDatabase Database, *pDatabase;
 typedef struct recCorredor Corredor, *pCorredor;
 typedef struct recArmario Armario, *pArmario;
 typedef struct recProduto Produto, *pProduto;
 typedef struct recEncomenda Encomenda, *pEncomenda;
+
+/*Globais: exceção à regra*/
+int maxCol, maxRow, activeRow, limitRow;
 
 struct recDatabase {
     int maxCorredores;
@@ -12,7 +18,7 @@ struct recDatabase {
 };
 
 struct recCorredor {
-    int ID; //sequencial
+    int ID; /*sequencial*/
     pCorredor next;
     pCorredor prev;
     pArmario armarios;
@@ -20,7 +26,7 @@ struct recCorredor {
 };
 
 struct recArmario {
-    int ID; //sequencial
+    int ID; /*sequencial*/
     pArmario next;
     pArmario prev;
     pCorredor parent;

@@ -1,13 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
-// External
+
 #include "Stokit.Common.h"
 #include "Stokit.Armarios.h"
 
 pCorredor newCorredor(pCorredor p)
 {
     pCorredor aux;
-    //Novo elemento
+    /*Novo elemento*/
     aux = malloc(sizeof(Corredor));
     if (!aux)
     {
@@ -16,12 +16,12 @@ pCorredor newCorredor(pCorredor p)
     }
     if (!p)
     {
-        //Primeiro elemento
+        /*Primeiro elemento*/
         aux->ID = 1;
     }
     else
     {
-        //Próximo elemento - sequencial
+        /*Próximo elemento - sequencial*/
         aux->ID = p->ID + 1;
         p->next = aux;
     }
@@ -48,14 +48,14 @@ void freeCorredor(pCorredor p)
 
 void deleteCorredor(pCorredor p)
 {
-    //Se for primeiro elemento
+    /*Se for primeiro elemento*/
     
-    //Se for elemento interior, sem ser dos extremos
+    /*Se for elemento interior, sem ser dos extremos*/
     
-    //Ultimo elemento
+    /*Ultimo elemento*/
     if (p->prev && !p->next)
     {
-        //lastCorredor
+        /*lastCorredor*/
         
         p->prev->next = NULL;
         freeCorredor(p);

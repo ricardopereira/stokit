@@ -1,13 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
-// External
+
 #include "Stokit.Common.h"
 #include "Stokit.Produtos.h"
 
 pArmario newArmario(pCorredor parent, pArmario p)
 {
     pArmario aux;
-    //Novo elemento
+    /*Novo elemento*/
     aux = malloc(sizeof(Armario));
     if (!aux)
     {
@@ -104,7 +104,7 @@ pArmario getArmarioComMenorProdutos(pDatabase db)
     if (!db) return NULL;
     pCorredor auxCorredor;
     pArmario auxArmario, menorArmario = NULL;
-    //Verificar em cada corredor o total de produtos de cada armário
+    /*Verificar em cada corredor o total de produtos de cada armário*/
     auxCorredor = db->corredores;
     while (auxCorredor)
     {
@@ -113,11 +113,11 @@ pArmario getArmarioComMenorProdutos(pDatabase db)
           menorArmario = auxArmario;
         while (auxArmario)
         {
-            //Obter o armário com menor número de produtos
+            /*Obter o armário com menor número de produtos*/
             if (menorArmario->produtosTotal > auxArmario->produtosTotal)
             {
                 menorArmario = auxArmario;
-                //O mínimo de produtos é 0, por isso, não vale a pena continuar
+                /*O mínimo de produtos é 0, por isso, não vale a pena continuar*/
                 if (menorArmario->produtosTotal == 0)
                     return menorArmario;
             }

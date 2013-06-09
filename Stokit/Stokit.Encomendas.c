@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include "Stokit.Common.h"
 #include "Stokit.DB.h"
 #include "Stokit.Produtos.h"

@@ -6,7 +6,7 @@ void testReposicaoStock(pDatabase db)
 {
     char fname[64];
     printf("\nIndique o ficheiro:\n");
-    //Necessita de ter um \n antes do fgets para ler a linha
+    /*Necessita de ter um \n antes do fgets para ler a linha*/
     fgets(fname,sizeof(fname),stdin);
     int n = loadReposicaoStock(fname,db);
     printf("\n%d produtos\n",n);
@@ -17,7 +17,7 @@ void testSatisfazerEncomenda(pDatabase db)
 {
     char fname[64];
     printf("\nIndique o ficheiro:\n");
-    //Necessita de ter um \n antes do fgets para ler a linha
+    /*Necessita de ter um \n antes do fgets para ler a linha*/
     fgets(fname,sizeof(fname),stdin);
     int n = loadEncomenda(fname,db);
     printf("\n%d produtos\n",n);

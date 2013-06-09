@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-// External
+
 #include "Stokit.Common.h"
 #include "Stokit.Armarios.h"
 #include "Stokit.Produtos.h"
@@ -16,7 +16,7 @@ pProduto createProduto(pProduto p)
     }
     if (p)
     {
-        //Próximo elemento
+        /*Próximo elemento*/
         p->next = aux;
     }
     return aux;
@@ -36,7 +36,7 @@ void initProduto(pProduto new, pProduto p, int n, int qtd)
 pProduto newProduto(pArmario parent, pProduto p, int n, int qtd)
 {
     pProduto aux;
-    //Novo elemento
+    /*Novo elemento*/
     aux = createProduto(p);
     if (parent)
     {
@@ -111,7 +111,7 @@ pProduto addProdutoEncomenda(pEncomenda encomenda, int n, int qtd)
             }
             encomenda->lastProduto = new;
         }
-        //Incrementar o número de produtos
+        /*Incrementar o número de produtos*/
         encomenda->produtosTotal++;
     }
     return new;
@@ -131,7 +131,7 @@ void freeProduto(pProduto p)
 pProduto getProduto(pCorredor listDB, int IDCorredor, int IDArmario)
 {
     pArmario auxArmario;
-    //Parent válido
+    /*Parent válido*/
     if (!listDB)
     {
         printf("Need list");
