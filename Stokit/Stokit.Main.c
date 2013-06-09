@@ -120,24 +120,36 @@ int checkWindowLimit(int *page)
     return 0;
 }
 
-void doVisualizarMenu(int page)
+int doVisualizarMenu()
+{
+    int option = 0;
+    mvprintw(activeRow++,STARTCOL,"1. Visualizar tudo\n");
+    mvprintw(activeRow++,STARTCOL,"2. Visualizar corredor\n");
+    mvprintw(activeRow++,STARTCOL,"3. Visualizar corredor & armário\n");
+    refresh();
+    option = getch();
+    while (option != 49 && option != 50 && option != 51)
+        option = getch();
+    return option - 48;
+}
+
+void doVisualizarTudoCabecalho(int page)
 {
     mvprintw(activeRow,STARTCOL,"1. Visualizar\n");
     activeRow += 2;
     mvprintw(activeRow++,STARTCOL,"Lista de Corredores (Página %d)\n",page);
 }
 
-void doVisualizar(pDatabase db)
+void doVisualizarTudo(pDatabase db)
 {
     pCorredor auxCorredor;
     pArmario auxArmario;
     pProduto auxProduto;
     int page = 1;
     
-    /*Inicializar a janela*/
+    /*Cabeçalho*/
     printWindow();
-    
-    doVisualizarMenu(page);
+    doVisualizarTudoCabecalho(page);
     
     auxCorredor = db->corredores;
     while (auxCorredor)
@@ -149,7 +161,7 @@ void doVisualizar(pDatabase db)
             
             /*Verificar se chegou ao limite da janela*/
             if (checkWindowLimit(&page) == 1)
-                doVisualizarMenu(page);
+                doVisualizarTudoCabecalho(page);
             
             if (auxArmario->produtos)
             {
@@ -157,7 +169,7 @@ void doVisualizar(pDatabase db)
                 
                 /*Verificar se chegou ao limite da janela*/
                 if (checkWindowLimit(&page) == 1)
-                    doVisualizarMenu(page);
+                    doVisualizarTudoCabecalho(page);
                 
                 auxProduto = auxArmario->produtos;
                 while (auxProduto)
@@ -167,13 +179,29 @@ void doVisualizar(pDatabase db)
                     
                     /*Verificar se chegou ao limite da janela*/
                     if (checkWindowLimit(&page) == 1)
-                        doVisualizarMenu(page);
+                        doVisualizarTudoCabecalho(page);
                 }
             }
             auxArmario = auxArmario->next;
         }
         auxCorredor = auxCorredor->next;
     }
+}
+
+void doVisualizar(pDatabase db)
+{
+    /*Inicializar a janela*/
+    printWindow();
+    
+    switch (doVisualizarMenu()) {
+        case 1:
+            doVisualizarTudo(db);
+            break;
+            
+        default:
+            break;
+    }
+
     mvprintw(activeRow++,STARTCOL,"Prima escape para voltar ao menu");
     refresh();
     while (getch() != 27);
