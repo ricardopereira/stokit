@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "Stokit.Common.h"
 #include "Stokit.DB.h"
@@ -12,7 +13,7 @@ pEncomenda getEncomenda(FILE *f)
     int num, qtd;
     pEncomenda resEncomenda;
     pProduto auxProduto = NULL;
-    char buffer[512];
+    char nome[MAXNAME];
     resEncomenda = malloc(sizeof(Encomenda));
     resEncomenda->lastProduto = NULL;
     resEncomenda->produtosTotal = 0;
@@ -26,11 +27,11 @@ pEncomenda getEncomenda(FILE *f)
                 /*Adiciona o produto*/
                 auxProduto = addProdutoEncomenda(resEncomenda,num,qtd);
             }
-            else if (fgets(buffer,sizeof(buffer),f))
+            else if (fgets(nome,sizeof(nome),f))
             {
                 /*Ler nome da encomenda*/
-                removeBreakLine(buffer);
-                puts(buffer);
+                removeBreakLine(nome);
+                strcpy(resEncomenda->nome,nome);
             }
             else
                 fseek(f,1,SEEK_CUR);
@@ -43,13 +44,13 @@ pEncomenda getEncomenda(FILE *f)
 
 int doSatisfazerEncomenda(pDatabase db, pEncomenda enc)
 {
-    /*Verificar se existe algum produto a encomendar*/
-    if (!db || !enc) return 0;
+    int total = 0, needRollback = 0, i = 0;
     pProduto encProduto,auxProduto;
     /*Guardar cada produto que foi alterado*/
     pProduto* trackChanges = calloc(enc->produtosTotal,sizeof(pArmario));
     
-    int total = 0, needRollback = 0, i = 0;
+    /*Verificar se existe algum produto a encomendar*/
+    if (!db || !enc) return 0;
     /*Lista da encomenda*/
     encProduto = enc->produtos;
     while (encProduto)
@@ -63,10 +64,11 @@ int doSatisfazerEncomenda(pDatabase db, pEncomenda enc)
             {
                 auxProduto->lastQtd = auxProduto->qtd;
                 auxProduto->qtd -= encProduto->qtd;
-                trackChanges[total++] = auxProduto;
+                trackChanges[total] = auxProduto;
                 
                 /*ToDo - gerar relatório da venda dos produtos*/
             }
+            total++;
         }
         else
         {
@@ -155,18 +157,10 @@ void showRouteEncomenda(pDatabase db, pEncomenda enc)
     forEachArmario(db,enc->produtos,doRouteProduto);
 }
 
-int loadEncomenda(char *filename, pDatabase db)
+pEncomenda loadEncomenda(char *path, pDatabase db)
 {
     FILE *f = NULL;
-    char path[MAXPATH];
     pEncomenda encomenda = NULL;
-    pProduto auxProduto;
-    char satisfazerEncomenda;
-    int res = 0;
-    
-    /*Concatenar para o caminho final*/
-    getFullPath(path,sizeof(path),PathEncomendas,filename);
-    
     /*Ler o ficheiro de texto*/
     f = fopen(path,"r");
     if (f)
@@ -176,35 +170,163 @@ int loadEncomenda(char *filename, pDatabase db)
     else
         printf("(loadEncomenda)Erro: ficheiro não existe");
     fclose(f);
-    
-    /*Encomenda com os produtos*/
-    if (encomenda)
+    return encomenda;
+}
+
+int doEncomendaMenu()
+{
+    int option = 0;
+    while (option != 1 && option != KEYESCAPE)
     {
-        /*Mostra o que foi lido*/
-        auxProduto = encomenda->produtos;
-        while (auxProduto)
-        {
-            printf("\nProduto %d:%d",auxProduto->num,auxProduto->qtd);
-            auxProduto = auxProduto->next;
-        }
-        
-        /*Caminho da encomenda*/
-        printf("\n");
-        showRouteEncomenda(db,encomenda);
-        printf("\n");
-        
-        /*Verificar se é para satisfazer*/
-        printf("\nDeseja satisfazer a encomenda? (s/n)");
-        satisfazerEncomenda = getchar();
-        if (satisfazerEncomenda == 's')
-        {
-            doSatisfazerEncomenda(db,encomenda);
-            res = encomenda->produtosTotal;
-            
-            /*Mostrar avisos*/
-            checkEncomenda(encomenda);
-        }
+        /*Inicializar a janela*/
+        printWindow();
+        mvprintw(activeRow++,STARTCOL,"Encomendas");
+        mvprintw(activeRow++,STARTCOL," 1. Importar ficheiro da pasta \"%s\"",PathEncomendas);
+        activeRow++;
+        mvprintw(activeRow++,STARTCOL,"ESC. Voltar ao menu");
+        refresh();
+        option = getch() - ASCIIZERO;
     }
-    freeEncomenda(encomenda);
+    return option;
+}
+
+int doEncomendaPorFicheiro(pDatabase db)
+{
+    char fileName[MAXFILENAME+1]; /* +1 por causa da leitura pelo getnstr */
+    char path[MAXPATH];
+    int totalSatisfeitos, tryAgain = 1, res = 0;
+    char aux;
+    pEncomenda encomenda;
+    pProduto auxProduto;
+    
+    /*Cabeçalho*/
+    printWindow();
+    mvprintw(activeRow++,STARTCOL,"Encomendas");
+    mvprintw(activeRow++,STARTCOL," 1. Importar ficheiro da pasta \"%s\"",PathEncomendas);
+    activeRow++;
+    
+    fileName[0] = 0;
+    /*Enquanto for igual a zero*/
+    while (fileName[0] == 0)
+    {
+        refresh();
+        /*Pedir o corredor*/
+        mvprintw(activeRow,STARTCOL," Indique o nome do ficheiro: ");
+        getnstr(fileName,MAXFILENAME);
+    }
+    activeRow += 2;
+    mvprintw(activeRow++,STARTCOL,"Importação: %s",fileName);
+    
+    /*Concatenar para o caminho final*/
+    getFullPath(path,sizeof(path),PathEncomendas,fileName);
+    
+    if (access(path,W_OK) == -1)
+    {
+        mvprintw(activeRow++,STARTCOL," Ficheiro não existe");
+        activeRow++;
+        while (tryAgain)
+        {
+            /*Limpar caracter inválido*/
+            mvprintw(activeRow,STARTCOL," Deseja tentar novamente?        ");
+            mvprintw(activeRow,STARTCOL," Deseja tentar novamente? (s/n)");
+            refresh();
+            aux = getch();
+            /*Volta a tentar se colocar caracter inválido*/
+            tryAgain = aux != 's' && aux != 'S' && aux != 'n' && aux != 'N';
+        }
+        if (aux == 's' || aux == 'S')
+        {
+            /*Recursivo*/
+            res = doEncomendaPorFicheiro(db);
+        }
+        else
+            return KEYESCAPE;
+    }
+    else
+    {
+        /*Carregar lista de produtos*/
+        encomenda = loadEncomenda(path,db);
+        
+        /*Encomenda com os produtos*/
+        if (encomenda)
+        {
+            mvprintw(activeRow++,STARTCOL," Nome: %s",encomenda->nome);
+            mvprintw(activeRow++,STARTCOL," Total de produtos: %d",encomenda->produtosTotal);
+            activeRow++;
+            
+            auxProduto = encomenda->produtos;
+            while (auxProduto)
+            {
+                mvprintw(activeRow++,STARTCOL," Produto %d - Q: %d",auxProduto->num,auxProduto->qtd);
+                auxProduto = auxProduto->next;
+                
+                /*Verificar se chegou ao limite da janela*/
+                if (activeRow >= limitRow-3 /*retirar 3 linhas para a pergunta da reposição*/)
+                {
+                    mvprintw(activeRow,STARTCOL," (...)");
+                    break;
+                }
+            }
+            
+            activeRow++;
+            while (tryAgain)
+            {
+                /*Limpar caracter inválido*/
+                mvprintw(activeRow,STARTCOL," Deseja satisfazer?        ");
+                mvprintw(activeRow,STARTCOL," Deseja satisfazer? (s/n)");
+                refresh();
+                aux = getch();
+                /*Volta a tentar se colocar caracter inválido*/
+                tryAgain = aux != 's' && aux != 'S' && aux != 'n' && aux != 'N';
+            }
+            if (aux == 's' || aux == 'S')
+            {
+                /*Satisfazer encomenda*/
+                //totalSatisfeitos = doSatisfazerEncomenda(db,encomenda);
+                
+                totalSatisfeitos = 0;
+                
+                /*Verificar se foi satisfeita*/
+                if (encomenda->produtosTotal - totalSatisfeitos == 0)
+                {
+                    mvprintw(activeRow++,STARTCOL,"Encomenda satisfeita com sucesso");
+                    
+                    //showRouteEncomenda(db,encomenda);
+                }
+                else
+                {
+                    mvprintw(activeRow++,STARTCOL,"Encomenda não foi satisfeita por falta de stock de %d produtos",encomenda->produtosTotal - totalSatisfeitos);
+                    
+                    //checkEncomenda(encomenda);
+                }
+            }
+            else
+                activeRow++;
+                
+            freeEncomenda(encomenda);
+        }
+        else
+        {
+            mvprintw(activeRow++,STARTCOL," Ficheiro sem artigos ou inválido");
+        }
+        activeRow++;
+    }
     return res;
+}
+
+void doEncomenda(pDatabase db)
+{
+    /*MENU de seleção*/
+    switch (doEncomendaMenu()) {
+        case KEYESCAPE:
+            return;
+        default:
+            if (doEncomendaPorFicheiro(db) == KEYESCAPE)
+                return;
+            break;
+    }
+    
+    mvprintw(activeRow++,STARTCOL,"Prima escape para voltar ao menu");
+    refresh();
+    while (getch() != ASCIIESC);
 }

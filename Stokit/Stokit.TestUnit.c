@@ -1,27 +1,43 @@
 #include <stdio.h>
 #include <string.h>
+
 #include "Stokit.Common.h"
+#include "Stokit.DB.h"
+#include "Stokit.Reposicao.h"
+#include "Stokit.Encomendas.h"
+#include "Stokit.Armarios.h"
+#include "Stokit.Corredores.h"
 
 void testReposicaoStock(pDatabase db)
 {
     char fname[64];
-    int n;
+    char path[MAXPATH];
+    pArmario listaProdutos;
     printf("\nIndique o ficheiro:\n");
     /*Necessita de ter um \n antes do fgets para ler a linha*/
     fgets(fname,sizeof(fname),stdin);
-    n = loadReposicaoStock(fname,db);
-    printf("\n%d produtos\n",n);
-    if (n) showCorredores(db->corredores,1);
+    /*Concatenar para o caminho final*/
+    getFullPath(path,sizeof(path),PathReposicao,fname);
+    listaProdutos = loadReposicaoStock(path,db);
+    printf("\n%d produtos\n",listaProdutos->produtosTotal);
+    if (listaProdutos->produtosTotal)
+        showCorredores(db->corredores,1);
+    freeArmario(listaProdutos);
 }
 
 void testSatisfazerEncomenda(pDatabase db)
 {
     char fname[64];
-    int n;
+    char path[MAXPATH];
+    pEncomenda encomenda;
     printf("\nIndique o ficheiro:\n");
     /*Necessita de ter um \n antes do fgets para ler a linha*/
     fgets(fname,sizeof(fname),stdin);
-    n = loadEncomenda(fname,db);
-    printf("\n%d produtos\n",n);
-    if (n) showCorredores(db->corredores,1);
+    /*Concatenar para o caminho final*/
+    getFullPath(path,sizeof(path),PathReposicao,fname);
+    encomenda = loadEncomenda(path,db);
+    printf("\n%d produtos\n",encomenda->produtosTotal);
+    if (encomenda->produtosTotal)
+        showCorredores(db->corredores,1);
+    freeEncomenda(encomenda);
 }

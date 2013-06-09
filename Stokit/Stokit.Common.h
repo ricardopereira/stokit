@@ -6,7 +6,9 @@
 #define LIMIT_PRODUTO 6
 
 #define MAXFILENAME 64
-#define MAXPATH 255
+#define MAXPATH 256
+#define MAXBUFFER 512
+#define MAXNAME 100
 
 #define ASCIIZERO 48
 #define ASCIIESC 27
@@ -57,7 +59,7 @@ struct recProduto {
 };
 
 struct recEncomenda {
-    char *nome;
+    char nome[MAXNAME];
     pProduto produtos;
     pProduto lastProduto;
     int produtosTotal;

@@ -191,7 +191,7 @@ int doReposicaoPorFicheiro(pDatabase db)
                 mvprintw(activeRow++,STARTCOL,"Reposição com sucesso");
             }
             else
-                return KEYESCAPE;
+                activeRow++;
             
             freeArmario(listaProdutos);
         }

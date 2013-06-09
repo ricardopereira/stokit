@@ -67,7 +67,7 @@ pProduto addProdutoEncomenda(pEncomenda encomenda, int n, int qtd)
             /*Verificar duplicação*/
             if (auxProduto->num == new->num)
             {
-                //Duplicado
+                /*Duplicado*/
                 auxProduto->qtd += qtd;
                 return auxProduto;
             }
@@ -75,7 +75,7 @@ pProduto addProdutoEncomenda(pEncomenda encomenda, int n, int qtd)
             /*Verificar se é primeiro elemento da lista*/
             if (!auxProduto->prev && new->num < auxProduto->num)
             {
-                //Inserir na primeira posição
+                /*Inserir na primeira posição*/
                 new->prev = NULL;
                 new->next = auxProduto;
                 auxProduto->prev = new;

@@ -60,7 +60,7 @@ int main(int argc, const char * argv[])
                 break;
             case 4:
                 /*Satisfação de encomendas através dum ficheiro*/
-                //doEncomenda(db);
+                doEncomenda(db);
                 break;
             case 5:
                 /*Resumo do dia*/
