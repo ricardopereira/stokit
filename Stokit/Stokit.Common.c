@@ -86,3 +86,18 @@ int ask(char *question)
     else
         return 0;
 }
+
+int checkWindowLimit(int *page)
+{
+    /*Verificar se chegou ao limite da janela*/
+    if (activeRow >= limitRow)
+    {
+        mvprintw(activeRow,STARTCOL,"Prima enter para continuar...");
+        refresh();
+        getch();
+        printWindow();
+        (*page)++;
+        return 1;
+    }
+    return 0;
+}

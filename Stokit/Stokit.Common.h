@@ -71,3 +71,4 @@ void showCorredores(pCorredor p, int showProdutos);
 void removeBreakLine(char *result);
 void getFullPath(char *result, int size, char *path, char *filename);
 int ask(char *question);
+int checkWindowLimit(int *page);

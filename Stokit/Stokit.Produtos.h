@@ -4,3 +4,5 @@ pProduto getProduto(pCorredor corredor, int IDCorredor, int IDArmario);
 pProduto getProdutoByNum(pCorredor corredor, int n);
 pProduto addProdutoEncomenda(pEncomenda encomenda, int n, int qtd);
 pProduto findProduto(pArmario armario, int n);
+/*Interfaced*/
+void doShowProdutos(pDatabase db, pProduto produtos, char *text);

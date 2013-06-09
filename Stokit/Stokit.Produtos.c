@@ -182,3 +182,33 @@ pProduto findProduto(pArmario armario, int n)
     }
     return NULL;
 }
+
+void doShowProdutosCabecalho(int page, char *text)
+{
+    /*Inicializar a janela*/
+    printWindow();
+    mvprintw(activeRow++,STARTCOL,"%s (Página %d)",text,page);
+    activeRow++;
+}
+
+void doShowProdutos(pDatabase db, pProduto produtos, char *text)
+{
+    pProduto auxProduto;
+    int page = 1;
+    
+    doShowProdutosCabecalho(page,text);
+    
+    auxProduto = produtos;
+    while (auxProduto)
+    {
+        if (auxProduto->needStock)
+        {
+            /*Verificar se chegou ao limite da janela*/
+            if (checkWindowLimit(&page) == 1)
+                doShowProdutosCabecalho(page,text);
+            
+            mvprintw(activeRow++,STARTCOL," Produto %d - Q: %d",auxProduto->num,auxProduto->qtd);
+        }
+        auxProduto = auxProduto->next;
+    }
+}

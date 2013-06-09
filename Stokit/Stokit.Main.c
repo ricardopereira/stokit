@@ -122,21 +122,6 @@ void printClose()
     mvprintw(maxRow/2,(int)(maxCol-strlen(text))/2,text);
 }
 
-int checkWindowLimit(int *page)
-{
-    /*Verificar se chegou ao limite da janela*/
-    if (activeRow >= limitRow)
-    {
-        mvprintw(activeRow,STARTCOL,"Prima enter para continuar...");
-        refresh();
-        getch();
-        printWindow();
-        (*page)++;
-        return 1;
-    }
-    return 0;
-}
-
 void showCorredoresArmarios(pDatabase db, int idCorredor, int idArmario, void (*f)(int /*Página*/, int*/*Corredor*/, int*/*Armario*/))
 {
     pCorredor auxCorredor;

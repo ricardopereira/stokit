@@ -123,9 +123,21 @@ void checkEncomenda(pEncomenda enc)
     }
 }
 
-void doRouteProduto(pArmario armario, pProduto p)
+void doRouteEncomendaCabecalho(int page, pEncomenda encomenda)
+{
+    /*Inicializar a janela*/
+    printWindow();
+    if (encomenda)
+        mvprintw(activeRow++,STARTCOL,"Localização dos produtos da encomenda: %s (Página %d)",encomenda->nome,page);
+    else
+        mvprintw(activeRow++,STARTCOL,"Localização dos produtos da encomenda (Página %d)",page);
+    activeRow++;
+}
+
+void doRouteProduto(pArmario armario, pProduto p, void *parent)
 {
     pProduto auxProduto, routeProduto;
+    int page = 1;
     int showCabecalho = 1;
     /*Para cada armário*/
     if (armario && p)
@@ -140,11 +152,18 @@ void doRouteProduto(pArmario armario, pProduto p)
             {
                 if (showCabecalho)
                 {
-                    printf("\nIr ao corredor %d, armario %d e retirar:",armario->parent->ID,armario->ID);
+                    /*Verificar se chegou ao limite da janela*/
+                    if (checkWindowLimit(&page) == 1)
+                        doRouteEncomendaCabecalho(page,NULL);
+                    
+                    mvprintw(activeRow++,STARTCOL,"Ir ao corredor %d, armário %d e retirar:",armario->parent->ID,armario->ID);
                     showCabecalho = 0;
                 }
-                printf("\n P%d: %d unidades",
-                       routeProduto->num,routeProduto->qtd);
+                /*Verificar se chegou ao limite da janela*/
+                if (checkWindowLimit(&page) == 1)
+                    doRouteEncomendaCabecalho(page,NULL);
+                
+                mvprintw(activeRow++,STARTCOL," P%d: %d unidades",routeProduto->num,routeProduto->qtd);
             }
             routeProduto = routeProduto->next;
         }
@@ -153,6 +172,8 @@ void doRouteProduto(pArmario armario, pProduto p)
 
 void doRouteEncomenda(pDatabase db, pEncomenda encomenda)
 {
+    doRouteEncomendaCabecalho(1,encomenda);
+    
     /*ToDo - poderá necessitar de optimização*/
     forEachArmario(db,encomenda->produtos,doRouteProduto);
 }
@@ -267,7 +288,7 @@ int doEncomendaPorFicheiro(pDatabase db)
                 {
                     mvprintw(activeRow++,STARTCOL,"Encomenda satisfeita com sucesso");
                     
-                    if (ask("Deseja visualizar o caminho para os produtos?"))
+                    if (ask("Deseja visualizar a localização dos produtos?"))
                     {
                         doRouteEncomenda(db,encomenda);
                     }
@@ -278,7 +299,7 @@ int doEncomendaPorFicheiro(pDatabase db)
                     
                     if (ask("Deseja visualizar esses produtos?"))
                     {
-                        //doShowProdutos(db,encomenda->produtos);
+                        doShowProdutos(db,encomenda->produtos,"Produtos com quantidade em falta:");
                     }
                     
                     //checkEncomenda(encomenda);
