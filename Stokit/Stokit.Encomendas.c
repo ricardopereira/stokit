@@ -45,7 +45,8 @@ pEncomenda getEncomenda(FILE *f)
 int doSatisfazerEncomenda(pDatabase db, pEncomenda enc)
 {
     int total = 0, needRollback = 0, i = 0;
-    pProduto encProduto,auxProduto;
+    pProduto encProduto, auxProduto, itemResumoDia = NULL;
+    
     /*Guardar cada produto que foi alterado*/
     pProduto* trackChanges = calloc(enc->produtosTotal,sizeof(pArmario));
     
@@ -65,8 +66,6 @@ int doSatisfazerEncomenda(pDatabase db, pEncomenda enc)
                 auxProduto->lastQtd = auxProduto->qtd;
                 auxProduto->qtd -= encProduto->qtd;
                 trackChanges[total] = auxProduto;
-                
-                /*ToDo - gerar relatório da venda dos produtos*/
             }
             total++;
         }
@@ -89,6 +88,20 @@ int doSatisfazerEncomenda(pDatabase db, pEncomenda enc)
             auxProduto = trackChanges[++i];
         }
     }
+    /*Gerar relatório da venda dos produtos*/
+    else
+    {
+        auxProduto = trackChanges[i];
+        while (auxProduto)
+        {
+            itemResumoDia = addProduto(itemResumoDia,auxProduto->num,auxProduto->qtd);
+            /*Verificar se é o primeiro elemento*/
+            if (!db->produtosResumoDia)
+                db->produtosResumoDia = itemResumoDia;
+            /*Next*/
+            auxProduto = trackChanges[++i];
+        }
+    }
     free(trackChanges);
     return total;
 }
@@ -106,18 +119,19 @@ void freeEncomenda(pEncomenda p)
     }
 }
 
-void checkEncomenda(pEncomenda enc)
+void checkEncomenda(pDatabase db, pEncomenda enc)
 {
     if (!enc) return;
-    pProduto auxProduto;
+    pProduto auxProduto, itemSemStock = NULL;
     auxProduto = enc->produtos;
-    if (auxProduto)
-        printf("\nEncomendar os seguintes produtos:");
     while (auxProduto)
     {
         if (auxProduto->needStock)
         {
-            printf("\nP%d: %d",auxProduto->num,auxProduto->qtd);
+            itemSemStock = addProduto(itemSemStock,auxProduto->num,auxProduto->qtd);
+            /*Verificar se é o primeiro elemento*/
+            if (!db->produtosSemStock)
+                db->produtosSemStock = itemSemStock;
         }
         auxProduto = auxProduto->next;
     }
@@ -176,6 +190,14 @@ void doRouteEncomenda(pDatabase db, pEncomenda encomenda)
     
     /*ToDo - poderá necessitar de optimização*/
     forEachArmario(db,encomenda->produtos,doRouteProduto);
+}
+
+int checkProdutoNeedStock(pProduto p)
+{
+    if (p && p->needStock)
+        return 1;
+    else
+        return 0;
 }
 
 pEncomenda loadEncomenda(char *path, pDatabase db)
@@ -299,10 +321,10 @@ int doEncomendaPorFicheiro(pDatabase db)
                     
                     if (ask("Deseja visualizar esses produtos?"))
                     {
-                        doShowProdutos(db,encomenda->produtos,"Produtos com quantidade em falta:");
+                        doShowProdutos(encomenda->produtos,"Produtos com quantidade em falta:",checkProdutoNeedStock);
                     }
-                    
-                    //checkEncomenda(encomenda);
+                    /*Verificar a necessidade de pedir stock*/
+                    checkEncomenda(db,encomenda);
                 }
             }
             else

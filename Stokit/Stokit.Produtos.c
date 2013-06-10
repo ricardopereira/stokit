@@ -24,7 +24,7 @@ pProduto createProduto(pProduto p)
 
 void initProduto(pProduto new, pProduto p, int n, int qtd)
 {
-    if (!new) new = createProduto(p);
+    if (!new) return;
     new->num = n;
     new->qtd = qtd;
     new->prev = p;
@@ -48,6 +48,15 @@ pProduto newProduto(pArmario parent, pProduto p, int n, int qtd)
     initProduto(aux,p,n,qtd);
     aux->parent = parent;
     return aux;
+}
+
+pProduto addProduto(pProduto last, int n, int qtd)
+{
+    pProduto new;
+    /*Novo elemento*/
+    new = createProduto(last);
+    initProduto(new,last,n,qtd);
+    return new;
 }
 
 pProduto addProdutoEncomenda(pEncomenda encomenda, int n, int qtd)
@@ -191,17 +200,20 @@ void doShowProdutosCabecalho(int page, char *text)
     activeRow++;
 }
 
-void doShowProdutos(pDatabase db, pProduto produtos, char *text)
+void doShowProdutos(pProduto produtos, char *text, int (*check)(pProduto))
 {
     pProduto auxProduto;
     int page = 1;
     
     doShowProdutosCabecalho(page,text);
     
+    if (!produtos)
+        mvprintw(activeRow++,STARTCOL," Sem produtos");
+    
     auxProduto = produtos;
     while (auxProduto)
     {
-        if (auxProduto->needStock)
+        if (!check || (*check)(auxProduto))
         {
             /*Verificar se chegou ao limite da janela*/
             if (checkWindowLimit(&page) == 1)
@@ -211,4 +223,22 @@ void doShowProdutos(pDatabase db, pProduto produtos, char *text)
         }
         auxProduto = auxProduto->next;
     }
+}
+
+void doProdutosSemStock(pDatabase db)
+{
+    doShowProdutos(db->produtosSemStock,"Produtos com quantidade em falta:",NULL);
+    activeRow++;
+    mvprintw(activeRow++,STARTCOL,"Prima escape para voltar ao menu");
+    refresh();
+    while (getch() != ASCIIESC);
+}
+
+void doProdutosResumoDia(pDatabase db)
+{
+    doShowProdutos(db->produtosResumoDia,"Resumo de vendas da sessão atual:",NULL);
+    activeRow++;
+    mvprintw(activeRow++,STARTCOL,"Prima escape para voltar ao menu");
+    refresh();
+    while (getch() != ASCIIESC);
 }

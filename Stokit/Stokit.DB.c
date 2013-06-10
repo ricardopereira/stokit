@@ -19,20 +19,24 @@ pDatabase readFile(FILE *f)
     int maxProdutos;
     int doNextCorredor, doNextArmario;
     
+    pDatabase result;
+    pCorredor auxCorredor = NULL;
+    pArmario auxArmario;
+    pProduto auxProduto;
+    
     if (!f)
     {
         printf("(readFile)Erro: sem ficheiro\n");
         return NULL;
     }
     
-    pDatabase result = malloc(sizeof(Database));
-    pCorredor auxCorredor = NULL;
-    pArmario auxArmario;
-    pProduto auxProduto;
+    result = malloc(sizeof(Database));
     /*Inicializar*/
     result->corredores = NULL;
     result->maxCorredores = 0;
     result->maxArmarios = 0;
+    result->produtosResumoDia = NULL;
+    result->produtosSemStock = NULL;
     
     /*Inicialização*/
     idxCorredor = 0;

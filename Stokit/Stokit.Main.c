@@ -63,8 +63,12 @@ int main(int argc, const char * argv[])
                 doEncomenda(db);
                 break;
             case 5:
-                /*Resumo do dia*/
-                //doResumo(db);
+                /*Resumo de vendas*/
+                doProdutosResumoDia(db);
+                break;
+            case 6:
+                /*Produtos em falta - Sem Stock*/
+                doProdutosSemStock(db);
                 break;
         }
         if (option == KEYESCAPE || option == 0)
@@ -99,8 +103,10 @@ void printMenu()
     mvprintw(activeRow+1,STARTCOL,"2. Pesquisar");
     mvprintw(activeRow+2,STARTCOL,"3. Resposição de stock");
     mvprintw(activeRow+3,STARTCOL,"4. Encomendas");
-    mvprintw(activeRow+4,STARTCOL,"5. Resumo do dia");
-    mvprintw(activeRow+6,STARTCOL,"0. Fechar");
+    mvprintw(activeRow+4,STARTCOL,"5. Resumo de vendas");
+    mvprintw(activeRow+5,STARTCOL,"6. Produtos em falta");
+    
+    mvprintw(activeRow+7,STARTCOL,"0. Fechar");
 }
 
 void printCaption()

@@ -28,6 +28,8 @@ struct recDatabase {
     int maxArmarios;
     pCorredor corredores;
     pCorredor lastCorredor;
+    pProduto produtosResumoDia;
+    pProduto produtosSemStock;
 };
 
 struct recCorredor {
