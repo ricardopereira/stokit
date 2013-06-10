@@ -37,7 +37,6 @@
 		D7C3325C1763E7D600B7B613 /* Stokit.Corredores.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Stokit.Corredores.h; path = Stokit/Stokit.Corredores.h; sourceTree = SOURCE_ROOT; };
 		D7C3325D1763E7D600B7B613 /* Stokit.DB.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Stokit.DB.h; path = Stokit/Stokit.DB.h; sourceTree = SOURCE_ROOT; };
 		D7C3325E1763E7D600B7B613 /* Stokit.Encomendas.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Stokit.Encomendas.h; path = Stokit/Stokit.Encomendas.h; sourceTree = SOURCE_ROOT; };
-		D7C3325F1763E7D600B7B613 /* Stokit.Main.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Stokit.Main.h; path = Stokit/Stokit.Main.h; sourceTree = SOURCE_ROOT; };
 		D7C332601763E7D600B7B613 /* Stokit.Produtos.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Stokit.Produtos.h; path = Stokit/Stokit.Produtos.h; sourceTree = SOURCE_ROOT; };
 		D7C332611763E7D600B7B613 /* Stokit.Reposicao.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Stokit.Reposicao.h; path = Stokit/Stokit.Reposicao.h; sourceTree = SOURCE_ROOT; };
 		D7C332621763E7D600B7B613 /* Stokit.TestUnit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Stokit.TestUnit.h; path = Stokit/Stokit.TestUnit.h; sourceTree = SOURCE_ROOT; };
@@ -97,7 +96,6 @@
 				D7C3326A1763E7D600B7B613 /* Stokit.Reposicao.c */,
 				D7C3325D1763E7D600B7B613 /* Stokit.DB.h */,
 				D7C332661763E7D600B7B613 /* Stokit.DB.c */,
-				D7C3325F1763E7D600B7B613 /* Stokit.Main.h */,
 				D7C332681763E7D600B7B613 /* Stokit.Main.c */,
 				D7C332621763E7D600B7B613 /* Stokit.TestUnit.h */,
 				D7C3326B1763E7D600B7B613 /* Stokit.TestUnit.c */,

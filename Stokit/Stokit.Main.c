@@ -98,7 +98,7 @@ int main(int argc, const char * argv[])
 
 void printMenu()
 {
-    mvprintw(activeRow+0,STARTCOL,"1. Visualizar");
+    mvprintw(activeRow+0,STARTCOL,"1. Manutenção");
     mvprintw(activeRow+1,STARTCOL,"2. Pesquisar");
     mvprintw(activeRow+2,STARTCOL,"3. Reposição de stock");
     mvprintw(activeRow+3,STARTCOL,"4. Encomendas");
