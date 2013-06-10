@@ -1,0 +1,22 @@
+#!/bin/sh
+
+DirSource="Stokit"
+DirRelease="Release"
+
+echo $(date)
+
+if [ -d "$DirRelease" ]; then
+  echo "$DirRelease já existe"
+  exit
+fi
+
+echo "BUILDING---------------"
+
+if [ -d "$DirSource" ]; then
+  echo "$DirSource"
+  `mkdir -p "$DirRelease/"`
+  #Compile
+  gcc -o $DirRelease/stokit -std=c89 -lncurses $DirSource/*.c
+fi
+
+echo "FIM--------------------"

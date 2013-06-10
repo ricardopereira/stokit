@@ -25,6 +25,7 @@ int main(int argc, const char * argv[])
     
     /*Ler ficheiro*/
     db = loadDB(DB);
+    if (!db) return 1;
     /*Alertas*/
     loadAlertasStock(db);
     

@@ -334,7 +334,7 @@ int doEncomendaPorFicheiro(pDatabase db)
                 activeRow++;
             
             /*ToDo - verificar problema de memória com ncurses.h*/
-            //freeEncomenda(encomenda);
+            /*freeEncomenda(encomenda);*/
         }
         else
         {
