@@ -1,14 +1,21 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
+#include <unistd.h>
 
 #include "Stokit.Common.h"
 #include "Stokit.Corredores.h"
 #include "Stokit.Armarios.h"
 #include "Stokit.Produtos.h"
 
+#define RESUMODIA "ResumoVendas.txt"
+#define ALERTASSTOCK "AlertasStock.dat"
+
 void freeDB(pDatabase p)
 {
     freeCorredor(p->corredores);
+    freeProduto(p->produtosResumoDia);
+    freeProduto(p->produtosSemStock);
     free(p);
 }
 
@@ -36,7 +43,9 @@ pDatabase readFile(FILE *f)
     result->maxCorredores = 0;
     result->maxArmarios = 0;
     result->produtosResumoDia = NULL;
+    result->lastResumoDia = NULL;
     result->produtosSemStock = NULL;
+    result->lastSemStock = NULL;
     
     /*Inicialização*/
     idxCorredor = 0;
@@ -207,4 +216,110 @@ int saveDB(const char *path, pDatabase db)
     
     fclose(f);
     return 0;
+}
+
+void saveResumoDia(pDatabase db)
+{
+    pProduto auxProduto;
+    FILE *f;
+    time_t currentTime;
+    
+    if (!db->produtosResumoDia)
+        return;
+    
+    /*Obter o dia e hora atual*/
+    currentTime = time(NULL);
+    
+    /*Sempre a acrescentar no final do ficheiro*/
+    f = fopen(RESUMODIA,"a");
+    if (!f)
+    {
+        printf("(saveResumoDia)Erro: não foi possível criar %s\n",RESUMODIA);
+        return;
+    }
+    
+    /*Resumo de vendas*/
+    auxProduto = db->produtosResumoDia;
+    if (auxProduto)
+        /*Escrever a hora do ficheiro*/
+        fprintf(f,"%s",ctime(&currentTime));
+    
+    while (auxProduto)
+    {
+        fprintf(f," Produto %d - Q: %d\n",auxProduto->num,auxProduto->qtd);
+        auxProduto = auxProduto->next;
+    }
+    fclose(f);
+}
+
+void loadAlertasStock(pDatabase db)
+{
+    pProduto itemSemStock = NULL;
+    int num, qtd, total, i;
+    FILE *f;
+    
+    /*Ficheiro já tem que existir*/
+    if (access(ALERTASSTOCK,W_OK) == -1)
+        return;
+    
+    f = fopen(ALERTASSTOCK,"rb");
+    if (!f)
+    {
+        printf("(loadAlertasStock)Erro: não foi possível abrir %s\n",ALERTASSTOCK);
+        return;
+    }
+    
+    fread(&total,sizeof(int),1,f);
+    for (i=0; i<total; i++)
+    {
+        fread(&num,sizeof(int),1,f);
+        fread(&qtd,sizeof(int),1,f);
+        
+        itemSemStock = addProduto(itemSemStock,num,qtd);
+        /*Verificar se é o primeiro elemento*/
+        if (!db->produtosSemStock)
+            db->produtosSemStock = itemSemStock;
+    }
+    db->lastSemStock = itemSemStock;
+    fclose(f);
+}
+
+void saveAlertasStock(pDatabase db)
+{
+    pProduto auxProduto;
+    int aux, total = 0;
+    FILE *f;
+    
+    f = fopen(ALERTASSTOCK,"wb");
+    if (!f)
+    {
+        printf("(saveAlertasStock)Erro: não foi possível criar %s\n",ALERTASSTOCK);
+        return;
+    }
+    
+    if (!db->produtosSemStock)
+    {
+        fclose(f);
+        return;
+    }
+    
+    /*ToDo - melhorar isto*/
+    auxProduto = db->produtosSemStock;
+    while (auxProduto)
+    {
+        total++;
+        auxProduto = auxProduto->next;
+    }
+    fwrite(&total,sizeof(int),1,f);
+    /*Resumo de vendas*/
+    auxProduto = db->produtosSemStock;
+    while (auxProduto)
+    {
+        aux = auxProduto->num;
+        fwrite(&aux,sizeof(int),1,f);
+        aux = auxProduto->qtd;
+        fwrite(&aux,sizeof(int),1,f);
+        auxProduto = auxProduto->next;
+    }
+    fclose(f);
 }

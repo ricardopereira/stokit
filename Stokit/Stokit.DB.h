@@ -6,3 +6,7 @@
 void freeDB(pDatabase p);
 pDatabase loadDB(const char *path);
 int saveDB(const char *path, pDatabase list);
+
+void saveResumoDia(pDatabase db);
+void loadAlertasStock(pDatabase db);
+void saveAlertasStock(pDatabase db);

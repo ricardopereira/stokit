@@ -14,6 +14,12 @@
 #define ASCIIESC 27
 #define KEYESCAPE -21
 
+/*Interface*/
+void printWindow();
+void printCredits();
+void printCaption();
+
+/*Types*/
 typedef struct recDatabase Database, *pDatabase;
 typedef struct recCorredor Corredor, *pCorredor;
 typedef struct recArmario Armario, *pArmario;
@@ -29,7 +35,9 @@ struct recDatabase {
     pCorredor corredores;
     pCorredor lastCorredor;
     pProduto produtosResumoDia;
+    pProduto lastResumoDia;
     pProduto produtosSemStock;
+    pProduto lastSemStock;
 };
 
 struct recCorredor {
@@ -69,7 +77,7 @@ struct recEncomenda {
 
 typedef void (*funcArmario)(pArmario,pProduto);
 
-void showCorredores(pCorredor p, int showProdutos);
+/*Tools*/
 void removeBreakLine(char *result);
 void getFullPath(char *result, int size, char *path, char *filename);
 int ask(char *question);

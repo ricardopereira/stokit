@@ -4,34 +4,39 @@
 
 #include "Stokit.Common.h"
 
-void showCorredores(pCorredor p, int showProdutos)
+void printWindow()
 {
-    pCorredor auxCorredor;
-    pArmario auxArmario;
-    pProduto auxProduto;
-    
-    auxCorredor = p;
-    while (auxCorredor)
+    clear();
+    printCaption();
+    printCredits();
+    activeRow = STARTROW;
+}
+
+void printCredits()
+{
+    mvprintw(maxRow-1,0,"Ricardo Pereira & Francisco Abrantes © ISEC 2013");
+}
+
+void printCaption()
+{
+    char text[50];
+    snprintf(text,sizeof(text),"Stokit v1");
+    mvprintw(0,(int)(maxCol-strlen(text))/2,text);
+}
+
+int checkWindowLimit(int *page)
+{
+    /*Verificar se chegou ao limite da janela*/
+    if (activeRow >= limitRow)
     {
-        auxArmario = auxCorredor->armarios;
-        while (auxArmario)
-        {
-            printf("\nA%d.%d",auxCorredor->ID,auxArmario->ID);
-            if (showProdutos && auxArmario->produtos)
-            {
-                printf("\n Produtos: %d",auxArmario->produtosTotal);
-                auxProduto = auxArmario->produtos;
-                while (auxProduto)
-                {
-                    printf("\n P%d: %d",auxProduto->num,auxProduto->qtd);
-                    auxProduto = auxProduto->next;
-                }
-            }
-            auxArmario = auxArmario->next;
-        }
-        printf("\n");
-        auxCorredor = auxCorredor->next;
+        mvprintw(activeRow,STARTCOL,"Prima enter para continuar...");
+        refresh();
+        getch();
+        printWindow();
+        (*page)++;
+        return 1;
     }
+    return 0;
 }
 
 void forEachArmario(pDatabase db, pProduto p, funcArmario doSomething)
@@ -85,19 +90,4 @@ int ask(char *question)
         return 1;
     else
         return 0;
-}
-
-int checkWindowLimit(int *page)
-{
-    /*Verificar se chegou ao limite da janela*/
-    if (activeRow >= limitRow)
-    {
-        mvprintw(activeRow,STARTCOL,"Prima enter para continuar...");
-        refresh();
-        getch();
-        printWindow();
-        (*page)++;
-        return 1;
-    }
-    return 0;
 }

@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <ncurses.h>
 
 #include "Stokit.Common.h"
 #include "Stokit.DB.h"
@@ -101,6 +102,7 @@ int doSatisfazerEncomenda(pDatabase db, pEncomenda enc)
             /*Next*/
             auxProduto = trackChanges[++i];
         }
+        db->lastSemStock = itemResumoDia;
     }
     free(trackChanges);
     return total;
@@ -135,6 +137,7 @@ void checkEncomenda(pDatabase db, pEncomenda enc)
         }
         auxProduto = auxProduto->next;
     }
+    db->lastSemStock = itemSemStock;
 }
 
 void doRouteEncomendaCabecalho(int page, pEncomenda encomenda)

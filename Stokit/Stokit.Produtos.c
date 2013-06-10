@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <ctype.h>
+#include <ncurses.h>
 
 #include "Stokit.Common.h"
 #include "Stokit.Armarios.h"
@@ -227,11 +229,24 @@ void doShowProdutos(pProduto produtos, char *text, int (*check)(pProduto))
 
 void doProdutosSemStock(pDatabase db)
 {
+    int option = 0;
     doShowProdutos(db->produtosSemStock,"Produtos com quantidade em falta:",NULL);
     activeRow++;
-    mvprintw(activeRow++,STARTCOL,"Prima escape para voltar ao menu");
+    mvprintw(activeRow++,STARTCOL,"Prima X para limpar a lista");
+    mvprintw(activeRow++,STARTCOL,"Prima ESC para voltar ao menu");
     refresh();
-    while (getch() != ASCIIESC);
+    
+    while (option != 'X' && option != 'x' && option != ASCIIESC)
+    {
+        option = getch();
+    }
+    
+    if (toupper(option) == 'X')
+    {
+        freeProduto(db->produtosSemStock);
+        db->produtosSemStock = NULL;
+        db->lastSemStock = NULL;
+    }
 }
 
 void doProdutosResumoDia(pDatabase db)

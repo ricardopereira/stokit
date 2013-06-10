@@ -20,8 +20,6 @@ void testReposicaoStock(pDatabase db)
     getFullPath(path,sizeof(path),PathReposicao,fname);
     listaProdutos = loadReposicaoStock(path,db);
     printf("\n%d produtos\n",listaProdutos->produtosTotal);
-    if (listaProdutos->produtosTotal)
-        showCorredores(db->corredores,1);
     freeArmario(listaProdutos);
 }
 
@@ -37,7 +35,5 @@ void testSatisfazerEncomenda(pDatabase db)
     getFullPath(path,sizeof(path),PathReposicao,fname);
     encomenda = loadEncomenda(path,db);
     printf("\n%d produtos\n",encomenda->produtosTotal);
-    if (encomenda->produtosTotal)
-        showCorredores(db->corredores,1);
     freeEncomenda(encomenda);
 }

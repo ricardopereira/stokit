@@ -12,10 +12,8 @@
 #include "Stokit.Encomendas.h"
 
 void printMenu();
-void printCredits();
-void printCaption();
+void printAlertas(pDatabase db);
 void printClose();
-void printWindow();
 
 void doVisualizar(pDatabase db);
 void doPesquisa(pDatabase db);
@@ -27,6 +25,8 @@ int main(int argc, const char * argv[])
     
     /*Ler ficheiro*/
     db = loadDB(DB);
+    /*Alertas*/
+    loadAlertasStock(db);
     
     /*Iniciar interface*/
     #ifndef DEBUG
@@ -41,6 +41,7 @@ int main(int argc, const char * argv[])
     {
         printWindow();
         printMenu();
+        printAlertas(db);
     
         refresh();
         option = getch() - ASCIIZERO;
@@ -85,23 +86,21 @@ int main(int argc, const char * argv[])
     
     /*Terminar aplicação*/
     endwin();
+    
+    /*Save*/
+    saveResumoDia(db);
+    saveAlertasStock(db);
+    saveDB(DB,db);
+    
     freeDB(db);
     return 0;
-}
-
-void printWindow()
-{
-    clear();
-    printCaption();
-    printCredits();
-    activeRow = STARTROW;
 }
 
 void printMenu()
 {
     mvprintw(activeRow+0,STARTCOL,"1. Visualizar");
     mvprintw(activeRow+1,STARTCOL,"2. Pesquisar");
-    mvprintw(activeRow+2,STARTCOL,"3. Resposição de stock");
+    mvprintw(activeRow+2,STARTCOL,"3. Reposição de stock");
     mvprintw(activeRow+3,STARTCOL,"4. Encomendas");
     mvprintw(activeRow+4,STARTCOL,"5. Resumo de vendas");
     mvprintw(activeRow+5,STARTCOL,"6. Produtos em falta");
@@ -109,23 +108,17 @@ void printMenu()
     mvprintw(activeRow+7,STARTCOL,"0. Fechar");
 }
 
-void printCaption()
-{
-    mvprintw(maxRow-1,0,"Ricardo Pereira & Francisco Abrantes © ISEC 2013");
-}
-
-void printCredits()
-{
-    char text[50];
-    snprintf(text,sizeof(text),"Stokit v1");
-    mvprintw(0,(int)(maxCol-strlen(text))/2,text);
-}
-
 void printClose()
 {
     char text[50];
     snprintf(text,sizeof(text),"Prima qualquer tecla para sair");
     mvprintw(maxRow/2,(int)(maxCol-strlen(text))/2,text);
+}
+
+void printAlertas(pDatabase db)
+{
+    if (db->produtosSemStock)
+        mvprintw(maxRow-3,0,"ALERTAS: Existem produtos em falta");
 }
 
 void showCorredoresArmarios(pDatabase db, int idCorredor, int idArmario, void (*f)(int /*Página*/, int*/*Corredor*/, int*/*Armario*/))
@@ -360,8 +353,7 @@ int doPesquisaProduto(pDatabase db)
     pProduto auxProduto = NULL;
     pArmario auxArmario = NULL;
     pCorredor auxCorredor = NULL;
-    int idProduto = 0, tryAgain = 1, res = 0;
-    char aux;
+    int idProduto = 0, res = 0;
     char prod[LIMIT_PRODUTO+1]; /* +1 por causa da leitura pelo getnstr */
         
     /*Cabeçalho*/
@@ -386,6 +378,7 @@ int doPesquisaProduto(pDatabase db)
     auxProduto = getProdutoByNum(db->corredores,idProduto);
     if (auxProduto)
     {
+        /*Mostrar dados do produto*/
         auxArmario = auxProduto->parent;
         if (auxArmario)
             auxCorredor = auxArmario->parent;
@@ -401,17 +394,7 @@ int doPesquisaProduto(pDatabase db)
     {
         mvprintw(activeRow++,STARTCOL," Não existe");
         activeRow++;
-        while (tryAgain)
-        {
-            /*Limpar caracter inválido*/
-            mvprintw(activeRow,STARTCOL," Deseja fazer nova pesquisa?        ");
-            mvprintw(activeRow,STARTCOL," Deseja fazer nova pesquisa? (s/n)");
-            refresh();
-            aux = getch();
-            /*Volta a tentar se colocar caracter inválido*/
-            tryAgain = aux != 's' && aux != 'S' && aux != 'n' && aux != 'N';
-        }
-        if (aux == 's' || aux == 'S')
+        if (ask("Deseja fazer nova pesquisa?"))
         {
             /*Recursivo*/
             res = doPesquisaProduto(db);

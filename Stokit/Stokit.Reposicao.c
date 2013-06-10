@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <ncurses.h>
 
 #include "Stokit.Common.h"
 #include "Stokit.DB.h"
@@ -23,8 +24,6 @@ pArmario getReposicaoStock(FILE *f)
             fscanf(f,"%d:%d",&num,&qtd);
             /*Adiciona elemento*/
             auxProduto = newProduto(resArmario,auxProduto,num,qtd);
-            /*Mostra o que foi lido*/
-            /*printf("\nP%d:%d",auxProduto->num,auxProduto->qtd);*/
         }
     }
     else
@@ -99,8 +98,7 @@ int doReposicaoPorFicheiro(pDatabase db)
 {
     char fileName[MAXFILENAME+1]; /* +1 por causa da leitura pelo getnstr */
     char path[MAXPATH];
-    int tryAgain = 1, res = 0;
-    char aux;
+    int res = 0;
     pArmario listaProdutos;
     pProduto auxProduto;
     
@@ -129,17 +127,7 @@ int doReposicaoPorFicheiro(pDatabase db)
     {
         mvprintw(activeRow++,STARTCOL," Ficheiro não existe");
         activeRow++;
-        while (tryAgain)
-        {
-            /*Limpar caracter inválido*/
-            mvprintw(activeRow,STARTCOL," Deseja tentar novamente?        ");
-            mvprintw(activeRow,STARTCOL," Deseja tentar novamente? (s/n)");
-            refresh();
-            aux = getch();
-            /*Volta a tentar se colocar caracter inválido*/
-            tryAgain = aux != 's' && aux != 'S' && aux != 'n' && aux != 'N';
-        }
-        if (aux == 's' || aux == 'S')
+        if (ask("Deseja tentar novamente?"))
         {
             /*Recursivo*/
             res = doReposicaoPorFicheiro(db);
@@ -174,17 +162,7 @@ int doReposicaoPorFicheiro(pDatabase db)
             }
             
             activeRow++;
-            while (tryAgain)
-            {
-                /*Limpar caracter inválido*/
-                mvprintw(activeRow,STARTCOL," Deseja repor?        ");
-                mvprintw(activeRow,STARTCOL," Deseja repor? (s/n)");
-                refresh();
-                aux = getch();
-                /*Volta a tentar se colocar caracter inválido*/
-                tryAgain = aux != 's' && aux != 'S' && aux != 'n' && aux != 'N';
-            }
-            if (aux == 's' || aux == 'S')
+            if (ask("Deseja repor?"))
             {
                 /*Repor Stock*/
                 doReporStock(db,listaProdutos->produtos);
